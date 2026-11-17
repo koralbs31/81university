@@ -311,7 +311,7 @@ def _page_media(tmp_path, parts, name='pkg', **opts):
 def test_canonical_extensions_and_sniffing(tmp_path):
     files = Files(str(tmp_path / 'src'))
     parts = [MediaPart(MediaKind.IMAGE, asset=files.image('a.jpeg', 'JPEG')), MediaPart(MediaKind.VIDEO, asset=files.raw('b.m4v', MP4)), MediaPart(MediaKind.IMAGE, asset=files.image('c.jpg', 'PNG')), MediaPart(MediaKind.IMAGE, asset=files.image('d.gif', 'GIF')), MediaPart(MediaKind.IMAGE, asset=files.image('e.webp', 'WEBP')), MediaPart(MediaKind.AUDIO, asset=files.raw('f.oga', OGG)), MediaPart(MediaKind.AUDIO, asset=files.raw('g.mp3', WAV)), MediaPart(MediaKind.VIDEO, asset=files.raw('h.webm', WEBM)), MediaPart(MediaKind.IMAGE, asset=files.raw('bad.png', b'<html>not an image</html>')), MediaPart(MediaKind.AUDIO, asset=files.raw('bad.wav', b'RIFF\x00\x00\x00\x00WEBPVP8 ')), MediaPart(MediaKind.IMAGE, asset=files.raw('i.svg', b'<svg/>'))]
-    act, nodes, report = _page_media(tmp_path, parts)
+    act, nodes, report = _page_media(tmp_path, parts, transcode=False)
     media = [n for n in nodes if n['type'] != 'blockLibrary']
     formats = [n['attrs']['blockObject']['content']['file_format'] for n in media]
     assert formats == ['jpg', 'mp4', 'png', 'gif', 'webp', 'ogg', 'wav', 'webm']
