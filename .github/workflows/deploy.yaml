@@ -46,7 +46,7 @@ jobs:
         working-directory: apps/web
       - run: bun run test
         working-directory: apps/web
-      - run: bunx tsc --noEmit
+      - run: bunx next typegen && bunx tsc --noEmit
         working-directory: apps/web
   helm:
     runs-on: ubuntu-latest
