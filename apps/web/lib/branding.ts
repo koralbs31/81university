@@ -1,7 +1,7 @@
 /** Deployment defaults. Organization branding settings still override these assets. */
 export const branding = {
   name: '81 University',
-  logo: '/81university-logo.png',
+  logo: '/81university-wordmark.png',
   icon: '/81university-icon.png',
   showLearnHouseBranding: false,
 } as const
