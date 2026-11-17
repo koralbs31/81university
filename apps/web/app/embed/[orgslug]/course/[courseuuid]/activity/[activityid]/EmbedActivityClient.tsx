@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -152,8 +153,8 @@ function EmbedActivityClient({ activityId, courseuuid, orgslug }: EmbedActivityC
           {showBranding && (
             <div className="mb-6">
               <Image
-                src="/learnhouse_bigicon.png"
-                alt="LearnHouse"
+                src={branding.icon}
+                alt={branding.name}
                 width={64}
                 height={64}
                 className="mx-auto"
@@ -223,8 +224,8 @@ function PoweredByBadge({ activityUrl }: { activityUrl: string }) {
         className="bg-white/80 backdrop-blur-lg rounded-2xl p-2 light-shadow block cursor-pointer"
       >
         <Image
-          src="/lrn.svg"
-          alt="LearnHouse"
+          src={branding.icon}
+          alt={branding.name}
           width={20}
           height={20}
         />

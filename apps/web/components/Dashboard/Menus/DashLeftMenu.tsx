@@ -1,4 +1,5 @@
 'use client';
+import { branding } from '@/lib/branding'
 import { useOrg } from '@components/Contexts/OrgContext';
 import { signOut } from '@components/Contexts/AuthContext';
 import { House, BookOpen, Files, Users, CurrencyCircleDollar, Buildings, Globe, Question, Gear, SignOut, SidebarSimple, Check, CaretDown, PencilSimple, ChatsCircle, Book, ChatCircleDots, Headphones, VideoCamera, ChartBar, DotsThree, UsersThree, Shield, UserPlus, ClipboardText, Palette, Rocket, Robot, LinkSimple, Key, Lock, Wrench, ChartLine, MagnifyingGlass, ChalkboardSimple, Cube, ShoppingBag, FolderSimple, Plus, Code, Lightning, Steps, SlidersHorizontal, } from '@phosphor-icons/react';
@@ -200,7 +201,7 @@ function DashLeftMenu() {
         <Link className={cn("flex items-center transition-opacity hover:opacity-70", isCollapsed ? "" : "space-x-3")} href={'/'}>
           {(planMeetsRequirement(plan, 'standard') && hasOrgLogo(org)) || isWhiteLabelPlan(plan) ? (<div className="h-9 w-9 rounded-lg overflow-hidden bg-white shrink-0">
               <OrgSquareLogo org={org} wideInsetClassName="p-1" fallback={<OrgInitial org={org}/>}/>
-            </div>) : (<img src="/lrn-dash.svg" alt="Learnhouse logo" className="h-8 w-8"/>)}
+            </div>) : (<img src={branding.icon} alt={branding.name} className="h-9 w-9 rounded-lg bg-white p-1"/>)}
           {!isCollapsed && (<div className="flex flex-col min-w-0">
               <span className="font-semibold text-sm text-white truncate">
                 {org?.name}
@@ -622,7 +623,7 @@ function DashLeftMenu() {
                   </a>
                 </HoverMenuItem>
                 <HoverMenuItem asChild>
-                  <a href="https://learnhouse.app" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                  <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
                     <Globe size={16} weight="fill"/>
                     <span>{t('common.help_menu.website')}</span>
                   </a>

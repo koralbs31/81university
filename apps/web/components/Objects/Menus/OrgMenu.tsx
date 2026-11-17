@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useMessaging, useMessagingEnabled } from '@components/Messaging/MessagingProvider'
@@ -50,7 +51,6 @@ import {
 } from '@components/ui/tooltip'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { Keys } from '@components/Objects/Shortcuts/Kbd'
-import { useShowLearnHouseBranding } from '@components/Hooks/useLearnHouseBranding'
 
 // Only shows on demand (feedback button), so keep it out of every page's
 // initial bundle.
@@ -85,7 +85,6 @@ export const OrgMenu = (props: any) => {
   const config = org?.config?.config
   const primaryColor = config?.customization?.general?.color || config?.general?.color || ''
   const colors = getMenuColorClasses(primaryColor)
-  const showBranding = useShowLearnHouseBranding()
 
   // Filter dashboard menu items by resolved_features from API
   const rf = config?.resolved_features
@@ -158,10 +157,8 @@ export const OrgMenu = (props: any) => {
                       alt={org?.name || 'Logo'}
                       className="h-full w-auto max-w-[150px] lg:max-w-[180px] shrink-0 object-contain rounded-md"
                     />
-                  ) : showBranding ? (
-                    <LearnHouseLogo logoFilter={colors.logoFilter} />
                   ) : (
-                    <span className={`text-lg font-bold truncate max-w-[200px] ${colors.text}`}>{org?.name}</span>
+                    <BrandLogo />
                   )}
                 </div>
               </Link>
@@ -317,7 +314,7 @@ export const OrgMenu = (props: any) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
-                        href="https://learnhouse.app"
+                        href="/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2"
@@ -414,14 +411,15 @@ export const OrgMenu = (props: any) => {
   )
 }
 
-const LearnHouseLogo = ({ logoFilter }: { logoFilter: string }) => {
+const BrandLogo = () => {
   return (
     <Image
-      src="/lrn-text.svg"
-      alt="LearnHouse logo"
+      src={branding.logo}
+      alt={branding.name}
       width={133}
       height={40}
-      style={{ height: 'auto', filter: logoFilter }}
+      style={{ height: 'auto' }}
+      className="rounded bg-white px-1 py-0.5"
     />
   )
 }

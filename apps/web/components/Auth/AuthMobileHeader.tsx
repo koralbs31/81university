@@ -1,9 +1,10 @@
 'use client'
+import { branding } from '@/lib/branding'
 import React from 'react'
 import { Trans } from 'react-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import learnhouseIcon from 'public/81university-icon.png'
 import { getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
 import { getUriWithOrg } from '@services/config/config'
@@ -100,7 +101,7 @@ export default function AuthMobileHeader({ org, welcomeText }: AuthMobileHeaderP
                     width={56}
                     height={56}
                     src={learnhouseIcon}
-                    alt="LearnHouse"
+                    alt={branding.name}
                     className="object-contain"
                   />
                 )
@@ -110,7 +111,7 @@ export default function AuthMobileHeader({ org, welcomeText }: AuthMobileHeaderP
         </Link>
 
         <div className="relative z-10 mt-4 min-w-0">
-          <p className="truncate text-xl font-black tracking-tight text-white">{org?.name || 'LearnHouse'}</p>
+          <p className="truncate text-xl font-black tracking-tight text-white">{org?.name || branding.name}</p>
           {displayMessage && (
             <p className="mt-0.5 line-clamp-2 text-sm font-medium text-white/65">{displayMessage}</p>
           )}

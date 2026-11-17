@@ -1,9 +1,10 @@
 'use client'
+import { branding } from '@/lib/branding'
 import React from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import learnhouseIcon from 'public/81university-icon.png'
 import { getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
 import { getUriWithOrg } from '@services/config/config'
@@ -148,15 +149,15 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
               and for the no-org apex panel (platform shows no logo on the image). */}
           {!isWhiteLabel && !noOrg && (
             <div className="login-topbar">
-              <Link prefetch href="https://learnhouse.app" target="_blank">
+              <Link prefetch href="/" target="_blank">
                 <img
-                  src="/lrn.svg"
-                  alt="LearnHouse"
+                  src={branding.icon}
+                  alt={branding.name}
                   width={30}
                   height={30}
                   className={cn(
                     "transition-opacity hover:opacity-100",
-                    text_color === 'light' ? "opacity-60 invert" : "opacity-40"
+                    "rounded-lg bg-white p-1"
                   )}
                 />
               </Link>
@@ -199,7 +200,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                               width={96}
                               height={96}
                               src={learnhouseIcon}
-                              alt="LearnHouse"
+                              alt={branding.name}
                               className="object-contain"
                             />
                           )
@@ -210,7 +211,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
 
                   {/* Text content */}
                   <div className="space-y-1">
-                    <h1 className="font-black text-3xl tracking-tight">{org?.name || 'LearnHouse'}</h1>
+                    <h1 className="font-black text-3xl tracking-tight">{org?.name || branding.name}</h1>
                     {displayMessage && (
                       <p className={cn(
                         "text-lg max-w-sm leading-relaxed",

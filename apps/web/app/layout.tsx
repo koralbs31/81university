@@ -1,4 +1,5 @@
 import '../styles/globals.css'
+import { branding } from '@/lib/branding'
 import React from 'react'
 import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
@@ -49,6 +50,9 @@ export const viewport: Viewport = {
 
 // Saved to the home screen, the app opens without browser chrome.
 export const metadata: Metadata = {
+  title: branding.name,
+  applicationName: branding.name,
+  icons: { icon: '/81university-favicon.png', apple: '/81university-apple-touch-icon.png' },
   appleWebApp: { capable: true, statusBarStyle: 'default' },
   formatDetection: { telephone: false },
 }

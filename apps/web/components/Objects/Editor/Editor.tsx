@@ -1,4 +1,5 @@
 'use client';
+import { branding } from '@/lib/branding'
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -544,7 +545,7 @@ const EditorLearnHouseLogo = () => {
     const [animation] = React.useState(() => logoAnimations[Math.floor(Math.random() * logoAnimations.length)]);
     return (<div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center overflow-hidden">
       <motion.div initial={animation.initial} animate={animation.animate} transition={animation.transition}>
-        <Image src="/lrn.svg" alt="LearnHouse" width={14} height={14} className="invert"/>
+        <Image src={branding.icon} alt={branding.name} width={14} height={14} className="invert"/>
       </motion.div>
     </div>);
 };

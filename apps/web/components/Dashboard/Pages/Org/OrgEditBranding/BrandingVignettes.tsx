@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -206,7 +207,7 @@ export function LoginPanelVignette({
           {scrim && <span className="absolute inset-0 bg-black/30" />}
           {showLearnHouseMark && (
             <img
-              src="/lrn.svg"
+              src={branding.icon}
               alt=""
               className={cn('absolute', large ? 'top-3 start-3 h-4' : 'top-1.5 start-1.5 h-2', light ? 'opacity-60 invert' : 'opacity-40')}
             />

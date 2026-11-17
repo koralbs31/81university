@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { isWhiteLabelPlan } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -16,6 +17,7 @@ export { isWhiteLabelPlan }
 export function useShowLearnHouseBranding(): boolean {
   const org = useOrg() as any
   const plan = usePlan()
+  if (!branding.showLearnHouseBranding) return false
   if (isWhiteLabelPlan(plan)) return false
   if (plan === 'free') return true
   const watermark =

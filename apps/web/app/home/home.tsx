@@ -1,18 +1,19 @@
 'use client'
+import { branding } from '@/lib/branding'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { canManageOrgFromSession, seesPlatformHubFromSession } from '@components/Hooks/useAdminStatus'
 import { useLHAnalytics } from '@services/analytics/useLHAnalytics'
 import { AnalyticsEvent } from '@services/analytics/events'
 import DemoEntryCard from '@components/Objects/Demo/DemoEntryCard'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { getAPIUrl, getUriWithOrg, getLEARNHOUSE_PLATFORM_URL_VAL } from '@services/config/config'
+import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { apiFetch } from '@services/utils/ts/requests'
 import { signOut } from '@components/Contexts/AuthContext'
 import OrgSquareLogo from '@components/Objects/Org/OrgSquareLogo'
 import { deleteOrganization, leaveOrg } from '@services/organizations/orgs'
 import { ChevronRight, Languages, Check, LogOut, Settings, LogIn, Plus, MoreVertical, CreditCard, Trash2, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, useState, useSyncExternalStore } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +41,6 @@ import {
 } from '@components/ui/dialog'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 
-const noSubscription = () => () => {}
 
 function HomeClient() {
   const { t, i18n } = useTranslation()
@@ -49,11 +49,6 @@ function HomeClient() {
   const access_token = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
   const isLoading = session?.status === 'loading'
-  // The platform URL is runtime config the browser reads; this page is
-  // prerendered without it. Read it through useSyncExternalStore so hydration
-  // matches the server HTML, then the link appears.
-  const platformUrl = useSyncExternalStore(noSubscription, getLEARNHOUSE_PLATFORM_URL_VAL, () => '')
-
   const { data: orgs, isLoading: orgsLoading } = useQuery({
     queryKey: ['orgs', 'user'],
     queryFn: () => apiFetch(`${getAPIUrl()}orgs/user/page/1/limit/50`, access_token),
@@ -111,8 +106,8 @@ function HomeClient() {
             <div className="flex flex-col items-center mb-10">
               { }
               <img
-                src="/lrn.svg"
-                alt="LearnHouse"
+                src={branding.icon}
+                alt={branding.name}
                 width={44}
                 height={44}
                 className="opacity-90"
@@ -254,22 +249,6 @@ function HomeClient() {
             </div>
 
             {/* Footer */}
-            {platformUrl ? (
-              <a
-                href={platformUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30 hover:text-black/60 transition-colors"
-              >
-                <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50 group-hover:text-black/70">LearnHouse</span>
-              </a>
-            ) : (
-              <div className="mt-10 flex items-center gap-1.5 text-[11px] text-black/30">
-                <span>{t('common.powered_by', { defaultValue: 'Powered by' })}</span>
-                <span className="font-semibold tracking-tight text-black/50">LearnHouse</span>
-              </div>
-            )}
             <CopyrightFooter year={new Date().getFullYear()} className="mt-4 pt-0" />
           </div>
         </div>

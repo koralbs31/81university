@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 import { createPortal } from 'react-dom'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signOut } from '@components/Contexts/AuthContext'
@@ -161,7 +162,7 @@ function DashMobileMenu() {
                 </div>
               ) : (
                 <div className="h-10 w-10 flex items-center justify-center bg-white/[0.06] rounded-xl shrink-0">
-                  <img src="/lrn-dash.svg" alt="LearnHouse" className="h-5 w-5" style={{ filter: 'brightness(0) invert(1)' }} />
+                  <img src={branding.icon} alt={branding.name} className="h-6 w-6 rounded bg-white p-0.5" />
                 </div>
               )}
               <div className="flex-1 min-w-0">

@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 
 import React, { useEffect, useRef, useState } from 'react'
 import '@videojs/react/video/skin.css'
@@ -210,7 +211,7 @@ function PlayerLogo() {
   if (!showBranding) return null
   return (
     <img
-      src="/lrn.svg"
+      src={branding.icon}
       alt=""
       aria-hidden="true"
       draggable={false}

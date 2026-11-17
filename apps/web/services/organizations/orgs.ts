@@ -1,3 +1,4 @@
+import { withBrandingDefaults } from '@/lib/branding';
 import { cache } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import { RequestBodyFormWithAuthHeader, RequestBodyWithAuthHeader, errorHandling, fetchWithRetry, getResponseMetadata, } from '@services/utils/ts/requests';
@@ -29,7 +30,7 @@ const fetchOrgBySlug = cache(async (org_slug: string, access_token?: string) => 
     return errorHandling(result);
 });
 export async function getOrganizationContextInfo(org_slug: any, _next: any, access_token?: string) {
-    return fetchOrgBySlug(String(org_slug), access_token);
+    return withBrandingDefaults(await fetchOrgBySlug(String(org_slug), access_token));
 }
 export async function getOrganizationContextInfoWithUUID(org_uuid: string, next: any, access_token?: string) {
     const result = await fetch(`${getAPIUrl()}orgs/uuid/${org_uuid}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
@@ -51,7 +52,7 @@ const fetchOrgBySlugWithoutCredentials = cache(async (org_slug: string) => {
     return errorHandling(result);
 });
 export async function getOrganizationContextInfoWithoutCredentials(org_slug: any, _next?: any) {
-    return fetchOrgBySlugWithoutCredentials(String(org_slug));
+    return withBrandingDefaults(await fetchOrgBySlugWithoutCredentials(String(org_slug)));
 }
 export function getOrganizationContextInfoNoAsync(org_slug: any, next: any, access_token: string) {
     const result = fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));

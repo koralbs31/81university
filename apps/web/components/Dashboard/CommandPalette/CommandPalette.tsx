@@ -1,4 +1,5 @@
 'use client'
+import { branding } from '@/lib/branding'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
@@ -256,7 +257,7 @@ export default function CommandPalette() {
               </div>
               {!isWhiteLabel && (
                 <img
-                  src="/lrn-dash.svg"
+                  src={branding.icon}
                   alt=""
                   aria-hidden="true"
                   draggable={false}
