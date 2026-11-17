@@ -1,5 +1,7 @@
 # Deployed VPS
 
+Web and API are managed by **Argo CD** from the public [81university repository](https://github.com/koralbs31/81university). Use the [GitOps guide](../gitops/README.md) for application updates and rollbacks. The manual image-loading and Helm-upgrade commands below document the original bootstrap; do not use them for subsequent application releases. PostgreSQL/Redis remain in their separate infrastructure Helm release.
+
 Site: https://81university.com
 
 The deployment uses the custom domain `81university.com`, a Let's Encrypt certificate, K3s/Traefik, the two application images, PostgreSQL/Redis, and Cloudflare R2. Google and email-link login are disabled; password login is enabled. The site's default language is Hebrew. A fresh production database was initialized; the local development database was not restored into it. A small Hebrew demonstration course is provided for verification.
