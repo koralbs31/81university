@@ -1,9 +1,8 @@
 'use client'
-import { branding } from '@/lib/branding'
+import BrandLogo from '@components/Objects/BrandLogo'
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useMessaging, useMessagingEnabled } from '@components/Messaging/MessagingProvider'
-import Image from 'next/image'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
@@ -408,18 +407,5 @@ export const OrgMenu = (props: any) => {
       )}
 
     </>
-  )
-}
-
-const BrandLogo = () => {
-  return (
-    <Image
-      src={branding.logo}
-      alt={branding.name}
-      width={133}
-      height={40}
-      style={{ height: 'auto' }}
-      className="rounded bg-white px-1 py-0.5"
-    />
   )
 }

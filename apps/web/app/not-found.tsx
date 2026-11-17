@@ -1,4 +1,4 @@
-import { branding } from '@/lib/branding'
+import BrandLogo from '@components/Objects/BrandLogo'
 import ErrorShell, { ErrorActionRows, ErrorButton } from '@components/Objects/StyledElements/Error/ErrorShell'
 import { GoBackButton, RequestedPath } from '@components/Objects/StyledElements/Error/NotFoundExtras'
 import { HomeIcon } from 'lucide-react'
@@ -19,7 +19,7 @@ export default function NotFound() {
 
       <header className="relative z-10 flex items-center px-6 py-5 sm:px-10">
         <a href="/" aria-label="Home" className="opacity-80 transition-opacity hover:opacity-100">
-          <img src={branding.logo} alt={branding.name} width={120} height={18} className="h-[18px] w-auto" />
+          <BrandLogo />
         </a>
       </header>
 

@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: branding.name,
   applicationName: branding.name,
-  icons: { icon: '/81university-favicon.png', apple: '/81university-apple-touch-icon.png' },
+  icons: { icon: '/81university-favicon-v2.png', apple: '/81university-apple-touch-icon.png' },
   appleWebApp: { capable: true, statusBarStyle: 'default' },
   formatDetection: { telephone: false },
 }
