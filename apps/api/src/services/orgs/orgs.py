@@ -1,0 +1,1056 @@
+import json
+import logging
+from datetime import datetime
+from typing import Literal, Optional
+from uuid import uuid4
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+from src.security.org_auth import enforce_org_mfa, require_org_destroy_right, require_org_role_permission
+from src.db.organization_config import OrganizationConfig, OrganizationConfigBase
+from src.security.rbac.rbac import authorization_verify_based_on_org_admin_status, authorization_verify_if_user_is_anon
+from src.security.rbac.utils import get_element_organization_id
+from src.security.rbac.constants import ADMIN_ROLE_ID
+from src.security.org_auth import get_user_org
+from src.security.superadmin import is_user_superadmin
+from src.services.security.profile_validation import validate_profile_fields
+from src.db.users import AnonymousUser, APITokenUser, InternalUser, PublicUser, SuperadminAPITokenUser
+from src.db.user_organizations import UserOrganization
+from src.db.organizations import Organization, OrganizationCreate, OrganizationRead, OrganizationUpdate
+from fastapi import HTTPException, UploadFile, status, Request
+from src.services.orgs.uploads import upload_org_logo, upload_org_preview, upload_org_thumbnail, upload_org_landing_content, upload_org_auth_background, upload_org_og_image, upload_org_favicon, upload_org_square_logo
+from src.db.organization_config import AuthBrandingConfig, SeoOrgConfig
+from src.core.ee_hooks import is_multi_org_allowed
+from src.services.webhooks.dispatch import dispatch_webhooks
+
+async def _get_org_config_cached(org_id: int, db_session: AsyncSession) -> Optional[OrganizationConfig]:
+    """Fetch OrganizationConfig with a Redis read-aside cache."""
+    from src.services.orgs.cache import get_cached_org_config, set_cached_org_config
+    raw = get_cached_org_config(org_id)
+    if raw is not None:
+        try:
+            return OrganizationConfig(**raw)
+        except Exception:
+            pass
+    stmt = select(OrganizationConfig).where(OrganizationConfig.org_id == org_id)
+    org_config = (await db_session.execute(stmt)).scalar_one_or_none()
+    if org_config is not None:
+        try:
+            set_cached_org_config(org_id, org_config.model_dump(mode='json'))
+        except Exception:
+            pass
+    return org_config
+
+def _build_org_read_with_resolved(org, org_config) -> OrganizationRead:
+    """Build OrganizationRead with resolved_features attached."""
+    from src.security.features_utils.resolve import resolve_all_features
+    config = OrganizationConfig.model_validate(org_config) if org_config else {}
+    org_read = OrganizationRead(**org.model_dump(), config=config)
+    if org_config and org_config.config:
+        resolved = resolve_all_features(org_config.config, org.id or 0)
+        config_dict = org_config.config.copy() if org_config.config else {}
+        config_dict['resolved_features'] = resolved
+        org_read.config = OrganizationConfig(id=org_config.id, org_id=org_config.org_id, config=config_dict, creation_date=org_config.creation_date, update_date=org_config.update_date)
+    return org_read
+
+async def _redact_org_email_unless_manager(request: Request, org_read: OrganizationRead, current_user, db_session: AsyncSession) -> OrganizationRead:
+    """Null ``email`` unless the caller holds the organizations update right.
+
+    SECURITY: the slug/uuid reads are public (logged-out visitors, signup
+    page), and ``org.email`` defaults to the creator's personal address. Only
+    people who may edit it (the settings form) need it back.
+    """
+    if org_read.email is None:
+        return org_read
+    allowed = False
+    if not isinstance(current_user, AnonymousUser) and current_user is not None:
+        try:
+            await rbac_check(request, org_read.org_uuid, current_user, 'update', db_session)
+            allowed = True
+        except HTTPException:
+            allowed = False
+    if allowed:
+        return org_read
+    return org_read.model_copy(update={'email': None})
+
+async def get_organization_by_uuid(request: Request, org_uuid: str, db_session: AsyncSession, current_user: PublicUser | AnonymousUser) -> OrganizationRead:
+    statement = select(Organization).where(Organization.org_uuid == org_uuid)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'read', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_uuid} has no config')
+    return await _redact_org_email_unless_manager(request, _build_org_read_with_resolved(org, org_config), current_user, db_session)
+
+async def get_organization_by_slug(request: Request, org_slug: str, db_session: AsyncSession, current_user: PublicUser | AnonymousUser) -> OrganizationRead:
+    from src.services.orgs.cache import get_cached_org_by_slug, set_cached_org_by_slug
+    cached = get_cached_org_by_slug(org_slug)
+    if cached is not None:
+        return await _redact_org_email_unless_manager(request, OrganizationRead(**cached), current_user, db_session)
+    statement = select(Organization).where(Organization.slug == org_slug).order_by(Organization.id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'read', db_session)
+    org_config = await _get_org_config_cached(org.id, db_session)
+    if org_config is None:
+        logging.warning(f'Organization {org_slug} has no config')
+    org_read = _build_org_read_with_resolved(org, org_config)
+    try:
+        set_cached_org_by_slug(org_slug, org_read.model_dump(mode='json'))
+    except Exception:
+        pass
+    return await _redact_org_email_unless_manager(request, org_read, current_user, db_session)
+MAX_FREE_ORGS = 3
+
+async def _enforce_free_org_cap(current_user: PublicUser | AnonymousUser, db_session: AsyncSession) -> None:
+    """Block a free-tier user from owning more than MAX_FREE_ORGS organizations.
+
+    Only orgs where the user is admin count toward the cap. A user with at least
+    one paid organization is exempt (a customer, not free-tier).
+
+    The shared demo organization is excluded. Visitors are joined to it as
+    admin, so without this filter simply looking at the demo would consume one
+    of a user's three free slots, and a user who looked at it three times over
+    could not create a real organization at all.
+    """
+    admin_org_ids = (await db_session.execute(select(UserOrganization.org_id).join(Organization, Organization.id == UserOrganization.org_id).where(UserOrganization.user_id == int(current_user.id), UserOrganization.role_id == ADMIN_ROLE_ID, Organization.is_demo.is_(False)))).scalars().all()
+    if len(admin_org_ids) < MAX_FREE_ORGS:
+        return
+    configs = (await db_session.execute(select(OrganizationConfig.config).where(OrganizationConfig.org_id.in_(admin_org_ids)))).scalars().all()
+
+    def _plan_of(cfg: dict | None) -> str:
+        cfg = cfg or {}
+        return cfg.get('plan') or (cfg.get('cloud') or {}).get('plan') or 'free'
+    if any((_plan_of(c) not in ('free', 'oss', None) for c in configs)):
+        return
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f'Free plan is limited to {MAX_FREE_ORGS} organizations. Upgrade an organization to create more.')
+
+async def _try_send_org_created(request: Request, org, current_user, db_session) -> None:
+    """Best-effort welcome email to the org creator (never fails the create).
+
+    The CTA lands on the new org's own dashboard, on the org's host. It used to
+    point at `{request-host}/home`, which is wrong twice over: orgs are created
+    from the platform apex, so the host was the apex rather than the new org,
+    and `/home` is the org picker on every host, so the creator was sent to a list
+    of organizations instead of into the one they had just made.
+    """
+    try:
+        email = getattr(current_user, 'email', None)
+        if not email:
+            return
+        from src.services.email.utils import get_org_signup_base_url
+        from src.services.users.emails import send_org_created_email
+        base = await get_org_signup_base_url(org.slug, request, db_session=db_session, org_id=org.id)
+        send_org_created_email(email, org.name, f"{base.rstrip('/')}/dash")
+    except Exception:
+        logging.exception('send_org_created_email failed')
+
+def _try_record_org_admin_in_loops(current_user, org) -> None:
+    """Best-effort: the org creator is now an ADMIN, so add them to the Loops
+    marketing audience. Fire-and-forget, SaaS-gated, never fails the create."""
+    try:
+        from src.services.marketing.loops import record_org_admin_in_loops
+        record_org_admin_in_loops(email=getattr(current_user, 'email', None), org_slug=getattr(org, 'slug', None), first_name=getattr(current_user, 'first_name', None), last_name=getattr(current_user, 'last_name', None))
+    except Exception:
+        logging.exception('record_org_admin_in_loops failed')
+
+async def create_org(request: Request, org_object: OrganizationCreate, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    if not is_multi_org_allowed():
+        existing_org = (await db_session.execute(select(Organization).limit(1))).scalars().first()
+        if existing_org is not None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Multi-organization mode requires Enterprise Edition')
+    org_object.slug = normalize_org_slug(org_object.slug)
+    statement = select(Organization).where(Organization.slug == org_object.slug)
+    org = (await db_session.execute(statement)).scalars().first()
+    if org:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"The slug '{org_object.slug}' is already taken. Please choose a different slug.")
+    reject_url_in_org_name(org_object.name)
+    org = Organization.model_validate(org_object)
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='You should be logged in to be able to achieve this action')
+    await _enforce_free_org_cap(current_user, db_session)
+    org.org_uuid = f'org_{uuid4()}'
+    org.creation_date = str(datetime.now())
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    await db_session.commit()
+    await db_session.refresh(org)
+    user_org = UserOrganization(user_id=int(current_user.id), org_id=int(org.id if org.id else 0), role_id=1, creation_date=str(datetime.now()), update_date=str(datetime.now()))
+    db_session.add(user_org)
+    await db_session.commit()
+    await db_session.refresh(user_org)
+    from src.routers.users import _invalidate_session_cache
+    _invalidate_session_cache(int(current_user.id))
+    from src.db.organization_config import OrganizationConfigV2Base
+    org_config = OrganizationConfigV2Base(config_version='2.0', plan='free')
+    org_config = json.loads(org_config.model_dump_json())
+    org_settings = OrganizationConfig(org_id=int(org.id if org.id else 0), config=org_config, creation_date=str(datetime.now()), update_date=str(datetime.now()))
+    db_session.add(org_settings)
+    await db_session.commit()
+    await db_session.refresh(org_settings)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org.id} has no config')
+    org_read = _build_org_read_with_resolved(org, org_config)
+    await _try_send_org_created(request, org, current_user, db_session)
+    _try_record_org_admin_in_loops(current_user, org)
+    return org_read
+
+async def create_org_with_config(request: Request, org_object: OrganizationCreate, current_user: PublicUser | AnonymousUser, db_session: AsyncSession, submitted_config: dict | OrganizationConfigBase):
+    if not is_multi_org_allowed():
+        existing_org = (await db_session.execute(select(Organization).limit(1))).scalars().first()
+        if existing_org is not None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Multi-organization mode requires Enterprise Edition')
+    org_object.slug = normalize_org_slug(org_object.slug)
+    statement = select(Organization).where(Organization.slug == org_object.slug)
+    org = (await db_session.execute(statement)).scalars().first()
+    if org:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"The slug '{org_object.slug}' is already taken. Please choose a different slug.")
+    reject_url_in_org_name(org_object.name)
+    org = Organization.model_validate(org_object)
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='You should be logged in to be able to achieve this action')
+    await _enforce_free_org_cap(current_user, db_session)
+    org.org_uuid = f'org_{uuid4()}'
+    org.creation_date = str(datetime.now())
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    await db_session.commit()
+    await db_session.refresh(org)
+    user_org = UserOrganization(user_id=int(current_user.id), org_id=int(org.id if org.id else 0), role_id=1, creation_date=str(datetime.now()), update_date=str(datetime.now()))
+    db_session.add(user_org)
+    await db_session.commit()
+    await db_session.refresh(user_org)
+    from src.routers.users import _invalidate_session_cache
+    _invalidate_session_cache(int(current_user.id))
+    if isinstance(submitted_config, dict):
+        org_config = submitted_config
+    else:
+        org_config = json.loads(submitted_config.model_dump_json())
+    org_settings = OrganizationConfig(org_id=int(org.id if org.id else 0), config=org_config, creation_date=str(datetime.now()), update_date=str(datetime.now()))
+    db_session.add(org_settings)
+    await db_session.commit()
+    await db_session.refresh(org_settings)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org.id} has no config')
+    org_read = _build_org_read_with_resolved(org, org_config)
+    await _try_send_org_created(request, org, current_user, db_session)
+    _try_record_org_admin_in_loops(current_user, org)
+    return org_read
+
+def _acting_user_id(current_user) -> int:
+    from src.security.auth import resolve_acting_user_id
+    return resolve_acting_user_id(current_user)
+
+async def update_org(request: Request, org_object: OrganizationUpdate, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization slug not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    reject_url_in_org_name(org_object.name)
+    if org_object.slug is not None and org_object.slug != org.slug:
+        org_object.slug = normalize_org_slug(org_object.slug)
+    if org.is_demo:
+        if org_object.slug is not None and org_object.slug != org.slug:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="The demo organization's address cannot be changed.")
+        if org_object.scripts is not None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Custom scripts cannot be set on the demo organization.')
+    identity_changes = org_object.scripts is not None and org_object.scripts != (org.scripts or {}) or (org_object.slug is not None and org_object.slug != org.slug) or (org_object.email is not None and org_object.email != org.email)
+    if identity_changes:
+        await require_org_role_permission(_acting_user_id(current_user), org.id, db_session, 'organizations', 'action_update')
+    statement = select(Organization).where(Organization.slug == org_object.slug)
+    slug_available = (await db_session.execute(statement)).scalars().first()
+    if slug_available and slug_available.id != org_id:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Organization slug already exists')
+    for var, value in vars(org_object).items():
+        if value is not None:
+            setattr(org, var, value)
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    await db_session.commit()
+    await db_session.refresh(org)
+    org = OrganizationRead.model_validate(org)
+    return org
+
+async def update_org_with_config_no_auth(request: Request, orgconfig: dict | OrganizationConfigBase, org_id: int, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization slug not found')
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    if isinstance(orgconfig, dict):
+        config_dict = orgconfig
+    else:
+        config_dict = json.loads(orgconfig.model_dump_json())
+    org_config.config = config_dict
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Organization updated'}
+
+async def update_org_logo(request: Request, logo_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
+    org.logo_image = name_in_disk
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    await db_session.commit()
+    await db_session.refresh(org)
+    return {'detail': 'Logo updated'}
+
+async def _update_org_general_image(request: Request, file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession, *, upload, config_key: str, detail: str):
+    """Upload an image and store its filename under the org's general
+    customization (v2: customization.general, v1: general)."""
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload(file, org.org_uuid)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general'][config_key] = name_in_disk
+    else:
+        if 'general' not in updated_config:
+            updated_config['general'] = {'enabled': True, 'color': '', 'footer_text': '', 'watermark': True, 'favicon_image': '', 'square_logo_image': '', 'auth_branding': {}}
+        updated_config['general'][config_key] = name_in_disk
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': detail}
+
+async def update_org_favicon(request: Request, favicon_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    return await _update_org_general_image(request, favicon_file, org_id, current_user, db_session, upload=upload_org_favicon, config_key='favicon_image', detail='Favicon updated')
+
+async def update_org_square_logo(request: Request, square_logo_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    return await _update_org_general_image(request, square_logo_file, org_id, current_user, db_session, upload=upload_org_square_logo, config_key='square_logo_image', detail='Square logo updated')
+
+async def update_org_thumbnail(request: Request, thumbnail_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
+    org.thumbnail_image = name_in_disk
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    await db_session.commit()
+    await db_session.refresh(org)
+    return {'detail': 'Thumbnail updated'}
+
+async def update_org_preview(request: Request, preview_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
+    return {'name_in_disk': name_in_disk}
+
+async def delete_org(request: Request, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """
+    Delete an organization and all related data.
+
+    SECURITY: Only organization admins can delete their own organization.
+    The RBAC check ensures the user has admin role (role_id=1) specifically
+    in the organization being deleted.
+
+    CASCADE DELETE: Related data is automatically deleted via database
+    CASCADE constraints on foreign keys.
+    """
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    if org.is_demo:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='The demo organization cannot be deleted.')
+    org_uuid = org.org_uuid
+    org_name = org.name
+    await rbac_check(request, org.org_uuid, current_user, 'delete', db_session)
+    await require_org_destroy_right(_acting_user_id(current_user), org.id, db_session)
+    user_id = current_user.id if hasattr(current_user, 'id') else 'unknown'
+    logging.warning(f'AUDIT: Organization deletion - org_id={org_id}, org_uuid={org_uuid}, org_name={org_name}, deleted_by_user_id={user_id}')
+    from src.routers.users import _invalidate_session_cache
+    affected_users = (await db_session.execute(select(UserOrganization.user_id).where(UserOrganization.org_id == org_id))).scalars().all()
+    for uid in affected_users:
+        _invalidate_session_cache(uid)
+    acting_email = getattr(current_user, 'email', None)
+    await db_session.delete(org)
+    await db_session.commit()
+    if acting_email:
+        try:
+            from src.services.users.emails import send_org_deleted_email
+            send_org_deleted_email(acting_email, org_name)
+        except Exception:
+            logging.exception('send_org_deleted_email failed')
+    return {'detail': 'Organization deleted', 'org_id': org_id, 'org_name': org_name}
+
+async def wipe_org_content(request: Request, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """
+    Delete all courses (and their cascaded content) in an organization while
+    keeping the organization and its members intact.
+
+    SECURITY: Only organization admins can wipe their org's content (enforced by
+    the RBAC check below). Course-related data (chapters, activities, etc.) is
+    removed via the database CASCADE constraints on the course foreign keys.
+    """
+    from src.db.courses.courses import Course
+    from src.services.courses.transfer.storage_utils import delete_storage_directory
+    from src.security.features_utils.usage import decrease_feature_usage
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'delete', db_session)
+    await require_org_destroy_right(_acting_user_id(current_user), org.id, db_session)
+    courses = (await db_session.execute(select(Course).where(Course.org_id == org_id))).scalars().all()
+    user_id = current_user.id if hasattr(current_user, 'id') else 'unknown'
+    logging.warning(f'AUDIT: Organization content wipe - org_id={org_id}, org_uuid={org.org_uuid}, course_count={len(courses)}, triggered_by_user_id={user_id}')
+    deleted_count = 0
+    for course in courses:
+        content_path = f'content/orgs/{org.org_uuid}/courses/{course.course_uuid}'
+        delete_storage_directory(content_path)
+        await db_session.delete(course)
+        deleted_count += 1
+    await db_session.commit()
+    for _ in range(deleted_count):
+        await decrease_feature_usage('courses', org_id, db_session)
+    return {'detail': 'Organization content wiped', 'deleted_courses': deleted_count}
+
+async def _org_ids_user_may_manage(user_id: int, org_ids: list[int], db_session: AsyncSession) -> set[int]:
+    """Org ids among ``org_ids`` where the user holds organizations.update
+    (mirrors require_org_role_permission, including its role-id fallback)."""
+    if await is_user_superadmin(user_id, db_session):
+        return set(org_ids)
+    from src.db.roles import Role
+    from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
+    rows = (await db_session.execute(select(UserOrganization.org_id, Role).join(Role, Role.id == UserOrganization.role_id).where(UserOrganization.user_id == user_id, UserOrganization.org_id.in_(org_ids)))).all()
+    allowed = set()
+    for org_id, role in rows:
+        if role.rights and isinstance(role.rights, dict):
+            if (role.rights.get('organizations') or {}).get('action_update', False):
+                allowed.add(org_id)
+        elif role.id in ADMIN_OR_MAINTAINER_ROLE_IDS:
+            allowed.add(org_id)
+    return allowed
+
+async def _redact_emails_for_member(orgs: list[OrganizationRead], user_id: int, db_session: AsyncSession) -> list[OrganizationRead]:
+    """``org.email`` is the creator's address by default; only members who may
+    edit it get it back (same rule as _redact_org_email_unless_manager)."""
+    if not orgs:
+        return orgs
+    managed = await _org_ids_user_may_manage(user_id, [o.id for o in orgs], db_session)
+    return [o if o.id in managed or o.email is None else o.model_copy(update={'email': None}) for o in orgs]
+
+async def get_orgs_by_user_admin(request: Request, db_session: AsyncSession, user_id: int, page: int=1, limit: int=10) -> list[OrganizationRead]:
+    statement = select(Organization, OrganizationConfig).join(UserOrganization).outerjoin(OrganizationConfig).where(UserOrganization.user_id == user_id, UserOrganization.role_id == ADMIN_ROLE_ID, UserOrganization.org_id == Organization.id).offset((page - 1) * limit).limit(limit)
+    org_data = (await db_session.execute(statement)).all()
+    orgsWithConfig = []
+    for org, org_config in org_data:
+        config = OrganizationConfig.model_validate(org_config) if org_config else {}
+        org_read = OrganizationRead(**org.model_dump(), config=config)
+        orgsWithConfig.append(org_read)
+    return await _redact_emails_for_member(orgsWithConfig, user_id, db_session)
+
+async def get_orgs_by_user(request: Request, db_session: AsyncSession, user_id: int, page: int=1, limit: int=10) -> list[OrganizationRead]:
+    statement = select(Organization, OrganizationConfig).join(UserOrganization).outerjoin(OrganizationConfig).where(UserOrganization.user_id == user_id, UserOrganization.org_id == Organization.id).offset((page - 1) * limit).limit(limit)
+    org_data = (await db_session.execute(statement)).all()
+    orgsWithConfig = []
+    for org, org_config in org_data:
+        config = OrganizationConfig.model_validate(org_config) if org_config else {}
+        org_read = OrganizationRead(**org.model_dump(), config=config)
+        orgsWithConfig.append(org_read)
+    return await _redact_emails_for_member(orgsWithConfig, user_id, db_session)
+
+def _deep_copy_config(org_config: OrganizationConfig) -> dict:
+    """Deep copy config dict so SQLAlchemy detects changes."""
+    return json.loads(json.dumps(org_config.config or {}))
+
+def _is_v2_config(config: dict) -> bool:
+    """Check if config is v2 format."""
+    return config.get('config_version', '1.0').startswith('2')
+
+async def update_org_signup_mechanism(request: Request, signup_mechanism: Literal['open', 'inviteOnly'], org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    await require_org_role_permission(_acting_user_id(current_user), org.id, db_session, 'organizations', 'action_update')
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('admin_toggles', {}).setdefault('members', {})
+        updated_config['admin_toggles']['members']['signup_mode'] = signup_mechanism
+    else:
+        updated_config.setdefault('features', {}).setdefault('members', {'enabled': True, 'signup_mode': 'open', 'admin_limit': 1, 'limit': 10})
+        updated_config['features']['members']['signup_mode'] = signup_mechanism
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
+    await dispatch_webhooks(event_name='org_signup_method_changed', org_id=org_id, data={'signup_mechanism': signup_mechanism})
+    return {'detail': 'Signup mechanism updated'}
+
+
+async def _update_feature_toggle(request: Request, feature: str, enabled: bool, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession, v1_default: dict | None=None) -> dict:
+    """Generic helper for updating a feature's enabled/disabled state."""
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('admin_toggles', {}).setdefault(feature, {})
+        updated_config['admin_toggles'][feature]['org_disabled'] = not enabled
+    else:
+        updated_config.setdefault('features', {})
+        if feature not in updated_config['features']:
+            updated_config['features'][feature] = v1_default or {'enabled': True}
+        updated_config['features'][feature]['enabled'] = enabled
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': f'{feature.capitalize()} configuration updated'}
+
+async def update_org_feature_toggle(request: Request, feature: str, enabled: bool, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """Turn one of the org-toggleable features on or off (Features settings)."""
+    from src.security.features_utils.resolve import ORG_TOGGLEABLE_FEATURES
+    if feature not in ORG_TOGGLEABLE_FEATURES:
+        raise HTTPException(status_code=400, detail='This feature cannot be toggled')
+    return await _update_feature_toggle(request, feature, enabled, org_id, current_user, db_session)
+
+async def update_org_communities_config(request: Request, communities_enabled: bool, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    return await _update_feature_toggle(request, 'communities', communities_enabled, org_id, current_user, db_session, v1_default={'enabled': True})
+FOLDERS_SORT_MODES = ('name_asc', 'name_desc', 'newest', 'oldest', 'manual')
+
+async def update_org_courses_config(request: Request, courses_enabled: bool, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    return await _update_feature_toggle(request, 'courses', courses_enabled, org_id, current_user, db_session, v1_default={'enabled': True, 'limit': 100})
+
+async def update_org_color_config(request: Request, color: str, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['color'] = color
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'watermark': True})
+        updated_config['general']['color'] = color
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Color configuration updated'}
+
+async def update_org_footer_text_config(request: Request, footer_text: str, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['footer_text'] = footer_text
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'footer_text': '', 'watermark': True})
+        updated_config['general']['footer_text'] = footer_text
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Footer text configuration updated'}
+
+async def update_org_email_sender_name_config(request: Request, email_sender_name: str, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """Set the display name on transactional email sent for this org.
+
+    Only the NAME is configurable. The From address stays the platform's
+    ``system_email_address``; it is the domain holding the verified SPF/DKIM
+    records, and letting an org pick its own address would break DKIM
+    alignment and damage a sending reputation shared by every tenant.
+
+    The submitted value is admin-typed text that ends up in an RFC 5322
+    header, so it is validated with the same sanitizer the send path uses.
+    Rejecting here (rather than silently storing something that sanitizes to
+    nothing) means the dashboard shows what was actually saved.
+    """
+    from src.services.email.sender import MAX_SENDER_NAME_LENGTH, sanitize_sender_name
+    submitted = email_sender_name or ''
+    if len(submitted) > MAX_SENDER_NAME_LENGTH:
+        raise HTTPException(status_code=400, detail=f'Sender name must be {MAX_SENDER_NAME_LENGTH} characters or less')
+    sanitized = sanitize_sender_name(submitted)
+    if submitted.strip() and (not sanitized):
+        raise HTTPException(status_code=400, detail='Sender name contains no usable characters')
+    reject_url_in_org_name(sanitized, field='email_sender_name')
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['email_sender_name'] = sanitized
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'watermark': True})
+        updated_config['general']['email_sender_name'] = sanitized
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Email sender name updated'}
+
+def resolve_org_sender_name(org_config: OrganizationConfig | None) -> str:
+    """The org's configured email display name, or "" when it has none.
+
+    "" is the signal to fall back to the platform default, so an org that never
+    touched the setting keeps sending under the deployment's own name. Read
+    through the sanitizer as well as written through it: a value stored before
+    validation existed, or edited straight in the database, must not reach a
+    header unfiltered.
+    """
+    from src.services.email.sender import sanitize_sender_name
+    if org_config is None or not isinstance(org_config.config, dict):
+        return ''
+    cfg = org_config.config
+
+    def _section(parent: dict, key: str) -> dict:
+        value = parent.get(key)
+        return value if isinstance(value, dict) else {}
+    v2 = _section(_section(cfg, 'customization'), 'general').get('email_sender_name')
+    if v2:
+        return sanitize_sender_name(v2)
+    v1 = _section(cfg, 'general').get('email_sender_name')
+    return sanitize_sender_name(v1) if v1 else ''
+
+async def update_org_font_config(request: Request, font: str, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['font'] = font
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'watermark': True})
+        updated_config['general']['font'] = font
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Font configuration updated'}
+
+async def update_org_default_language_config(request: Request, default_language: str, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    from src.services.email.translations import SUPPORTED_UI_LANGUAGES
+    if default_language not in SUPPORTED_UI_LANGUAGES:
+        raise HTTPException(status_code=400, detail=f"Unsupported language code. Supported: {', '.join(SUPPORTED_UI_LANGUAGES)}")
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['default_language'] = default_language
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'watermark': True})
+        updated_config['general']['default_language'] = default_language
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Default language updated'}
+
+def get_org_default_language(org_config: OrganizationConfig | None) -> str:
+    """Read the org's default language from its config, falling back to 'en'."""
+    if org_config is None or not org_config.config:
+        return 'en'
+    cfg = org_config.config
+    v2 = cfg.get('customization', {}).get('general', {}).get('default_language')
+    if v2:
+        return v2
+    v1 = cfg.get('general', {}).get('default_language')
+    return v1 or 'en'
+
+async def update_org_watermark_config(request: Request, watermark_enabled: bool, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    from src.core.deployment_mode import get_deployment_mode
+    plan = updated_config.get('plan', updated_config.get('cloud', {}).get('plan', 'free'))
+    if get_deployment_mode() == 'saas' and plan == 'free' and (not watermark_enabled):
+        raise HTTPException(status_code=403, detail='Watermark cannot be disabled on the free plan')
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {}).setdefault('general', {})
+        updated_config['customization']['general']['watermark'] = watermark_enabled
+    else:
+        updated_config.setdefault('general', {})
+        updated_config['general']['watermark'] = watermark_enabled
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Watermark configuration updated'}
+
+async def update_org_menu_config(request: Request, menu_config: dict, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    from src.db.organization_config import MenuConfig
+    menu_data = json.loads(MenuConfig(**menu_config or {}).model_dump_json())
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['menu'] = menu_data
+    else:
+        updated_config.setdefault('general', {'enabled': True})
+        updated_config['general']['menu'] = menu_data
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Menu configuration updated'}
+
+async def update_org_course_end_config(request: Request, course_end_config: dict, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """Replace the org's course-completion screen customization."""
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    from pydantic import ValidationError
+    from src.db.organization_config import CourseEndConfig
+    try:
+        course_end_data = json.loads(CourseEndConfig(**course_end_config or {}).model_dump_json())
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=exc.errors()[0].get('msg', 'Invalid course end configuration'))
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['course_end'] = course_end_data
+    else:
+        updated_config.setdefault('general', {'enabled': True})
+        updated_config['general']['course_end'] = course_end_data
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Course end configuration updated'}
+
+async def update_org_signup_fields_config(request: Request, signup_fields_config: dict, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    """Replace the org's custom signup field definitions.
+
+    Note these definitions are served publicly (the signup form is anonymous),
+    so labels/options are public strings; the admin UI says as much.
+    """
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    from src.db.organization_config import SignupFieldsConfig
+    fields_data = json.loads(SignupFieldsConfig(**signup_fields_config or {}).model_dump_json())
+    keys = [f['key'] for f in fields_data['fields']]
+    if len(keys) != len(set(keys)):
+        raise HTTPException(status_code=400, detail='Signup field keys must be unique')
+    if any((not k.strip() for k in keys)):
+        raise HTTPException(status_code=400, detail='Signup field keys may not be empty')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['signup_fields'] = fields_data
+    else:
+        updated_config.setdefault('general', {'enabled': True})
+        updated_config['general']['signup_fields'] = fields_data
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
+    return {'detail': 'Signup fields configuration updated'}
+
+async def update_org_auth_branding_config(request: Request, auth_branding: AuthBrandingConfig, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    branding_data = json.loads(auth_branding.model_dump_json())
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['auth_branding'] = branding_data
+    else:
+        updated_config.setdefault('general', {'enabled': True, 'color': '', 'footer_text': '', 'watermark': True, 'auth_branding': {}})
+        updated_config['general']['auth_branding'] = branding_data
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Auth branding configuration updated'}
+
+async def upload_org_auth_background_service(request: Request, background_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession) -> dict:
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_auth_background(background_file, org.org_uuid)
+    return {'detail': 'Auth background uploaded successfully', 'filename': name_in_disk}
+
+async def get_org_join_mechanism(request: Request, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'read', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    config = org_config.config or {}
+    version = config.get('config_version', '1.0')
+    if version.startswith('2'):
+        signup_mechanism = config.get('admin_toggles', {}).get('members', {}).get('signup_mode', 'open')
+    else:
+        signup_mechanism = config.get('features', {}).get('members', {}).get('signup_mode', 'open')
+    return signup_mechanism
+
+async def upload_org_preview_service(preview_file: UploadFile, org_uuid: str) -> dict:
+    name_in_disk = await upload_org_preview(preview_file, org_uuid)
+    return {'detail': 'Preview uploaded successfully', 'filename': name_in_disk}
+
+async def update_org_landing(request: Request, landing_object: dict, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['landing'] = landing_object
+    else:
+        updated_config['landing'] = landing_object
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'Landing object updated'}
+
+async def upload_org_landing_content_service(request: Request, content_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession) -> dict:
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)
+    return {'detail': 'Landing content uploaded successfully', 'filename': name_in_disk}
+
+async def update_org_seo_config(request: Request, seo_config: SeoOrgConfig, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession):
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = (await db_session.execute(statement)).scalars().first()
+    if org_config is None:
+        logging.warning(f'Organization {org_id} has no config')
+        raise HTTPException(status_code=404, detail='Organization config not found')
+    updated_config = _deep_copy_config(org_config)
+    seo_data = json.loads(seo_config.model_dump_json())
+    if _is_v2_config(updated_config):
+        updated_config.setdefault('customization', {})
+        updated_config['customization']['seo'] = seo_data
+    else:
+        updated_config['seo'] = seo_data
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+    db_session.add(org_config)
+    await db_session.commit()
+    await db_session.refresh(org_config)
+    return {'detail': 'SEO configuration updated'}
+
+async def upload_org_og_image_service(request: Request, og_image_file: UploadFile, org_id: int, current_user: PublicUser | AnonymousUser, db_session: AsyncSession) -> dict:
+    statement = select(Organization).where(Organization.id == org_id)
+    org = (await db_session.execute(statement)).scalars().first()
+    if not org:
+        raise HTTPException(status_code=404, detail='Organization not found')
+    await rbac_check(request, org.org_uuid, current_user, 'update', db_session)
+    name_in_disk = await upload_org_og_image(og_image_file, org.org_uuid)
+    return {'detail': 'OG image uploaded successfully', 'filename': name_in_disk}
+
+async def rbac_check(request: Request, org_uuid: str, current_user: PublicUser | AnonymousUser | InternalUser | APITokenUser, action: Literal['create', 'read', 'update', 'delete'], db_session: AsyncSession):
+    if action == 'read':
+        return True
+    if isinstance(current_user, InternalUser):
+        return True
+    if isinstance(current_user, SuperadminAPITokenUser):
+        return True
+    if isinstance(current_user, APITokenUser):
+        if action == 'delete':
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='API tokens are not allowed to delete organizations')
+        org = (await db_session.execute(select(Organization).where(Organization.org_uuid == org_uuid))).scalars().first()
+        if not org or org.id != current_user.org_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='API token cannot access resources outside its organization')
+        if not current_user.rights:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='API token has no permissions configured')
+        rights = current_user.rights
+        if isinstance(rights, dict):
+            org_rights = rights.get('organizations', {})
+            has_permission = org_rights.get(f'action_{action}', False)
+        else:
+            org_rights = getattr(rights, 'organizations', None)
+            has_permission = getattr(org_rights, f'action_{action}', False) if org_rights else False
+        if not has_permission:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"API token does not have '{action}' permission for organizations")
+        return True
+    else:
+        isUserAnon = await authorization_verify_if_user_is_anon(current_user.id)
+        isAllowedOnOrgAdminStatus = await authorization_verify_based_on_org_admin_status(request, current_user.id, action, org_uuid, db_session)
+        if isUserAnon:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='You should be logged in to be able to achieve this action')
+        if not isAllowedOnOrgAdminStatus:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User rights (admin status) : You don't have the right to perform this action")
+        target_org_id = await get_element_organization_id(org_uuid, db_session)
+        if target_org_id is not None:
+            await enforce_org_mfa(current_user.id, target_org_id, db_session)
+
+async def is_org_admin_role(user_id: int, org_id: int, db_session: AsyncSession) -> bool:
+    """True if the user holds the Admin role in the org, or is a superadmin.
+
+    Unlike ``is_org_admin`` this excludes Maintainers, whose seeded role has no
+    organization update/delete rights.
+    """
+    if await is_user_superadmin(user_id, db_session):
+        return True
+    user_org = await get_user_org(user_id, org_id, db_session)
+    return user_org is not None and user_org.role_id == ADMIN_ROLE_ID
+
+def normalize_org_slug(slug: str) -> str:
+    """Lower-case and validate an org slug as a single DNS label.
+
+    Slugs become hostnames in emailed links ({slug}.{domain}), so anything
+    outside a DNS label (/ ? # " ...) would let the slug rewrite the link.
+    """
+    from src.services.email.utils import ORG_SLUG_LABEL
+    normalized = (slug or '').strip().lower().strip('-')
+    if not ORG_SLUG_LABEL.fullmatch(normalized):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Organization address may only contain lowercase letters, numbers and dashes')
+    return normalized
+
+def reject_url_in_org_name(name: Optional[str], field: str='name') -> None:
+    """Org names are relayed in invite/role emails; links in them are phishing bait."""
+    result = validate_profile_fields({field: name})
+    if not result.is_valid:
+        raise HTTPException(status_code=400, detail={'code': 'PROFILE_FIELD_INVALID', 'message': 'Organization names may not contain URLs or links', 'errors': result.errors, 'invalid_fields': result.invalid_fields})

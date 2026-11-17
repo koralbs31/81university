@@ -1,0 +1,89 @@
+{{- range $component := list "postgres" "redis" }}
+{{- $pg := eq $component "postgres" }}
+{{- $settings := index $.Values $component }}
+{{- $port := ternary 5432 6379 $pg }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ $component }}
+spec:
+  clusterIP: None
+  selector:
+    app: {{ $.Release.Name }}-{{ $component }}
+  ports:
+    - {name: tcp, port: {{ $port }}, targetPort: tcp}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $.Release.Name }}-{{ $component }}
+spec:
+  serviceName: {{ $.Release.Name }}-{{ $component }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $.Release.Name }}-{{ $component }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Release.Name }}-{{ $component }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: {{ ternary 70 999 $pg }}
+        runAsGroup: {{ ternary 70 999 $pg }}
+        fsGroup: {{ ternary 70 999 $pg }}
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: {{ $component }}
+          image: {{ $settings.image }}
+          ports:
+            - {name: tcp, containerPort: {{ $port }}}
+          env:
+            {{- if $pg }}
+            - {name: POSTGRES_USER, value: learnhouse}
+            - {name: POSTGRES_DB, value: learnhouse}
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: {{ $.Values.existingSecret }}, key: POSTGRES_PASSWORD}
+            {{- else }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: {{ $.Values.existingSecret }}, key: REDIS_PASSWORD}
+          command: ["sh", "-ec"]
+          args:
+            - |
+              umask 077
+              printf 'appendonly yes\nrequirepass %s\n' "$REDIS_PASSWORD" > /tmp/redis.conf
+              exec redis-server /tmp/redis.conf
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 100m, memory: {{ ternary "256Mi" "64Mi" $pg }}}
+            limits: {cpu: "1", memory: {{ ternary "1Gi" "256Mi" $pg }}}
+          readinessProbe:
+            exec:
+              command: {{ if $pg }}["sh", "-ec", "pg_isready -U learnhouse -d learnhouse"]{{ else }}["sh", "-ec", "REDISCLI_AUTH=$REDIS_PASSWORD redis-cli ping | grep -q PONG"]{{ end }}
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket: {port: tcp}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: data
+              mountPath: {{ ternary "/var/lib/postgresql/data" "/data" $pg }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: {{ $.Values.storageClassName }}
+        resources:
+          requests:
+            storage: {{ $settings.size }}
+{{- end }}

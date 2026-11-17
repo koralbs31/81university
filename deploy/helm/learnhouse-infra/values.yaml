@@ -1,0 +1,8 @@
+existingSecret: learnhouse-database-secrets
+storageClassName: local-path
+postgres:
+  image: postgres:17-alpine
+  size: 10Gi
+redis:
+  image: redis:7.4-alpine
+  size: 2Gi

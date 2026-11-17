@@ -1,0 +1,38 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: learnhouse-letsencrypt
+  namespace: learnhouse
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: learnhouse-acme-account
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: learnhouse-tls
+  namespace: learnhouse
+spec:
+  secretName: learnhouse-tls
+  dnsNames: [school.194.163.156.252.sslip.io]
+  issuerRef:
+    name: learnhouse-letsencrypt
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: learnhouse-domain-tls
+  namespace: learnhouse
+spec:
+  secretName: learnhouse-domain-tls
+  dnsNames: [81university.com, www.81university.com]
+  issuerRef:
+    name: learnhouse-letsencrypt
+    kind: Issuer

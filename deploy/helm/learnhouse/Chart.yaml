@@ -1,0 +1,7 @@
+apiVersion: v2
+name: learnhouse
+description: Independent LearnHouse web and API services with S3/R2 media storage, external PostgreSQL and Redis.
+type: application
+version: 0.2.0
+appVersion: "1.4.4"
+kubeVersion: ">=1.25.0-0"

@@ -1,0 +1,53 @@
+# Public hostname, without protocol or trailing slash.
+domain: school.example.com
+https: true
+imagePullSecrets: [] # e.g. [{name: registry-credentials}]
+
+api:
+  enabled: true
+  replicas: 2
+  image:
+    repository: registry.example.com/learnhouse-api
+    tag: replace-with-release-tag
+    pullPolicy: IfNotPresent
+  existingSecret: learnhouse-api-secrets
+  env: {} # Additional non-secret API settings. Values must be strings.
+  resources:
+    requests: {cpu: 100m, memory: 512Mi}
+    limits: {cpu: "2", memory: 2Gi}
+
+web:
+  enabled: true
+  replicas: 2
+  image:
+    repository: registry.example.com/learnhouse-web
+    tag: replace-with-release-tag
+    pullPolicy: IfNotPresent
+  existingSecret: "" # Set to learnhouse-web-secrets for Google OAuth.
+  env: {} # Additional non-secret frontend settings. Values must be strings.
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {cpu: "2", memory: 1Gi}
+
+migration:
+  enabled: true
+  bootstrapExistingSecret: learnhouse-bootstrap-secrets
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 86400
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {cpu: "1", memory: 1Gi}
+
+# Durable media goes to S3-compatible storage (Cloudflare R2 by default).
+# Bucket, endpoint and credentials belong in api.existingSecret.
+contentStorage:
+  region: auto # Cloudflare R2 uses auto; choose the AWS region for AWS S3.
+
+ingress:
+  enabled: true
+  className: nginx
+  tlsSecretName: learnhouse-tls
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"

@@ -1,0 +1,17 @@
+domain: school.example.com
+https: true
+api:
+  image:
+    repository: registry.example.com/learnhouse-api
+    tag: "2026-11-15-1"
+web:
+  image:
+    repository: registry.example.com/learnhouse-web
+    tag: "2026-11-15-1"
+  # Set this only after creating the Google OAuth Secret.
+  existingSecret: ""
+contentStorage:
+  region: auto
+ingress:
+  className: nginx
+  tlsSecretName: learnhouse-tls

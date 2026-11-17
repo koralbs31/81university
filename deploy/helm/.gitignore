@@ -1,0 +1,5 @@
+*.env
+!*.env.example
+values-production.yaml
+*.tgz
+rendered*.yaml

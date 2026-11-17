@@ -1,0 +1,11 @@
+LearnHouse release {{ .Release.Name }} in namespace {{ .Release.Namespace }}.
+Public URL: {{ ternary "https" "http" .Values.https }}://{{ .Values.domain }}
+
+kubectl -n {{ .Release.Namespace }} get pods,svc,ingress,pvc
+{{- if .Values.migration.enabled }}
+kubectl -n {{ .Release.Namespace }} logs job/{{ .Release.Name }}-migrate
+{{- end }}
+
+External Secret changes require a rollout restart of the affected Deployment.
+Media is stored in your S3/R2 bucket. No upload PVC is created or mounted.
+API Pods still use temporary scratch space for uploads, imports and video processing.

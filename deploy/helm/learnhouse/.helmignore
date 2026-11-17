@@ -1,0 +1,6 @@
+*.tgz
+*.env
+*.env.example
+values-production.yaml
+__pycache__/
+test_chart.py

@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.env.*
+**/.env*
+.git
+*.tsbuildinfo
+runtime-config.json
+public/runtime-config.js

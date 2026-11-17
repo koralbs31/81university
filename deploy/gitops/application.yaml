@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: learnhouse
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/koralbs31/81university.git
+    targetRevision: main
+    path: deploy/helm/learnhouse
+    helm:
+      releaseName: learnhouse
+      valueFiles:
+        - ../../gitops/values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: learnhouse
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m

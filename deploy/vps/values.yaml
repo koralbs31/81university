@@ -1,0 +1,28 @@
+domain: 81university.com
+https: true
+api:
+  replicas: 1
+  image:
+    repository: docker.io/library/learnhouse-api
+    tag: vps-20261116
+    pullPolicy: Never
+  env:
+    FORWARDED_ALLOW_IPS: 10.42.0.0/16
+web:
+  replicas: 1
+  image:
+    repository: docker.io/library/learnhouse-web
+    tag: vps-20261116
+    pullPolicy: Never
+  existingSecret: ''
+contentStorage:
+  region: auto
+ingress:
+  className: traefik
+  tlsSecretName: learnhouse-domain-tls
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: null
+    nginx.ingress.kubernetes.io/proxy-read-timeout: null
+    nginx.ingress.kubernetes.io/proxy-buffering: null
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: learnhouse-infra
+description: Single-node PostgreSQL and Redis for a self-hosted LearnHouse installation.
+type: application
+version: 0.1.0

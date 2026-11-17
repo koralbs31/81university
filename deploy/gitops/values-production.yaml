@@ -1,0 +1,28 @@
+domain: 81university.com
+https: true
+api:
+  replicas: 1
+  image:
+    repository: ghcr.io/koralbs31/81university-api
+    tag: initial-build-pending
+    pullPolicy: IfNotPresent
+  env:
+    FORWARDED_ALLOW_IPS: 10.42.0.0/16
+web:
+  replicas: 1
+  image:
+    repository: ghcr.io/koralbs31/81university-web
+    tag: initial-build-pending
+    pullPolicy: IfNotPresent
+  existingSecret: ''
+contentStorage:
+  region: auto
+ingress:
+  className: traefik
+  tlsSecretName: learnhouse-domain-tls
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: null
+    nginx.ingress.kubernetes.io/proxy-read-timeout: null
+    nginx.ingress.kubernetes.io/proxy-buffering: null
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'

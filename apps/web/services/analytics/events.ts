@@ -1,0 +1,275 @@
+/* eslint-disable no-unused-vars --
+   Enum members are the public API of this registry; they are referenced by
+   call-sites across the app, not within this file. */
+/**
+ * learnhouse-analytics: central event registry (single source of truth).
+ *
+ * Naming convention: `object_action`, snake_case, past-tense verb.
+ * - Object first so events cluster by feature in PostHog (course_*, podcast_*, …).
+ * - Intent vs completion are distinct events (`*_modal_opened` → `*_created`).
+ * - Toggles carry their resulting state in a property, never two event names
+ *   (`course_published_toggled { published }`, not `course_published`/`_unpublished`).
+ *
+ * Every event goes to PostHog. The few listed in BACKEND_EVENTS also go to
+ * the LearnHouse backend, which powers the org analytics dashboards; for
+ * those the enum VALUE is the backend wire name and must match the API's
+ * catalog (apps/api/src/services/analytics/events.py), which drops anything
+ * it doesn't know. Where the PostHog name should differ from the backend
+ * name, add an entry to POSTHOG_NAME_OVERRIDES below; call-sites never deal
+ * with this.
+ */
+export enum AnalyticsEvent {
+  // ── Org analytics (backend) events; see BACKEND_EVENTS ───────────────────
+  CourseViewed = 'course_view',
+  ActivityViewed = 'activity_view',
+  TimeOnActivity = 'time_on_activity',
+  SearchQuery = 'search_query',
+  PageViewed = 'page_view',
+  VideoProgress = 'video_progress',
+  PathViewed = 'path_viewed',
+  // Also backend events, grouped with their feature below: BoardViewed,
+  // PlaygroundViewed, CertificateViewed, AiAssistantOpened, CommunityViewed,
+  // CourseShared, OfferViewed.
+
+  // ── Auth & onboarding ─────────────────────────────────────────────────────
+  SignupSubmitted = 'signup_submitted',
+  SignupSucceeded = 'signup_succeeded',
+  SignupFailed = 'signup_failed',
+  LoginSubmitted = 'login_submitted',
+  LoginSucceeded = 'login_succeeded',
+  LoginFailed = 'login_failed',
+  LoginGoogleClicked = 'login_google_clicked',
+  SignupGoogleClicked = 'signup_google_clicked',
+  LoginSsoClicked = 'login_sso_clicked',
+  GoogleOauthCallbackCompleted = 'google_oauth_callback_completed',
+  SsoCallbackCompleted = 'sso_callback_completed',
+  EmailVerificationCompleted = 'email_verification_completed',
+  PasswordResetLinkRequested = 'password_reset_link_requested',
+  PasswordResetSubmitted = 'password_reset_submitted',
+  EmailVerificationResent = 'email_verification_resent',
+  OnboardingWelcomeCompleted = 'onboarding_welcome_completed',
+  OnboardingStepActionClicked = 'onboarding_step_action_clicked',
+  OnboardingStepCompleted = 'onboarding_step_completed',
+  OnboardingStepSkipped = 'onboarding_step_skipped',
+  OnboardingIntentSelected = 'onboarding_intent_selected',
+  OnboardingVideoPlayed = 'onboarding_video_played',
+  OnboardingVideoFinished = 'onboarding_video_finished',
+  OnboardingFinished = 'onboarding_finished',
+  LoginClicked = 'login_clicked',
+  SignupClicked = 'signup_clicked',
+  LogoutClicked = 'logout_clicked',
+  JoinOrgBannerClicked = 'join_org_banner_clicked',
+  OrgJoined = 'org_joined',
+  OrgSelected = 'org_selected',
+  LanguageChanged = 'language_changed',
+  FeedbackSubmitted = 'feedback_submitted',
+
+  // ── Course discovery & enrollment (learner) ──────────────────────────────
+  CourseCardOpened = 'course_card_opened',
+  CourseStarted = 'course_started',
+  CourseLeft = 'course_left',
+  CourseSignupPrompted = 'course_signup_prompted',
+  CourseOfferCtaClicked = 'course_offer_cta_clicked',
+  ContributorApplicationSubmitted = 'contributor_application_submitted',
+  CourseProgressViewed = 'course_progress_viewed',
+  CourseSearched = 'course_searched',
+  CourseShared = 'course_shared',
+
+  // ── Activities / lessons consumption ─────────────────────────────────────
+  ActivityMarkedComplete = 'activity_marked_complete',
+  ActivityNextClicked = 'activity_next_clicked',
+  CourseCompleted = 'course_completed',
+  FocusModeEntered = 'focus_mode_entered',
+  AssignmentSubmitted = 'assignment_submitted',
+  AssignmentRetried = 'assignment_retried',
+  AssignmentGradeViewed = 'assignment_grade_viewed',
+  AssignmentTaskProgressSaved = 'assignment_task_progress_saved',
+  QuizBlockSubmitted = 'quiz_block_submitted',
+
+  // ── Communities & discussions ────────────────────────────────────────────
+  CommunityViewed = 'community_viewed',
+  CommunitiesListViewed = 'communities_list_viewed',
+  DiscussionViewed = 'discussion_viewed',
+  CommunityCreated = 'community_created',
+  DiscussionCreated = 'discussion_created',
+  CommentPosted = 'comment_posted',
+  CreateDiscussionModalOpened = 'create_discussion_modal_opened',
+  DiscussionUpvoted = 'discussion_upvoted',
+  CommentUpvoted = 'comment_upvoted',
+  DiscussionReactionToggled = 'discussion_reaction_toggled',
+
+  // ── Podcasts ─────────────────────────────────────────────────────────────
+  EpisodePlayed = 'episode_played',
+  EpisodeCompleted = 'episode_completed',
+  EpisodeCreated = 'episode_created',
+  EpisodePublishToggled = 'episode_publish_toggled',
+
+  // ── Playgrounds ──────────────────────────────────────────────────────────
+
+  // ── Boards ───────────────────────────────────────────────────────────────
+
+  // ── Library / media ──────────────────────────────────────────────────────
+  FolderCreated = 'folder_created',
+  MediaUploaded = 'media_uploaded',
+  MediaUploadFailed = 'media_upload_failed',
+  ResourceVisibilityChanged = 'resource_visibility_changed',
+  UsergroupLinked = 'usergroup_linked',
+  UsergroupUnlinked = 'usergroup_unlinked',
+
+  // ── Search, Trail, Certificates, Account ────────────────────────
+  SearchExecuted = 'search_executed',
+  SearchResultClicked = 'search_result_clicked',
+  TrailViewed = 'trail_viewed',
+  CertificateViewed = 'certificate_viewed',
+  CertificateDownloaded = 'certificate_downloaded',
+  CertificateSharedLinkedin = 'certificate_shared_linkedin',
+  CertificateVerificationViewed = 'certificate_verification_viewed',
+  AccountProfileUpdated = 'account_profile_updated',
+  AccountSubpageViewed = 'account_subpage_viewed',
+  AccountDeleteInitiated = 'account_delete_initiated',
+  AccountDeleted = 'account_deleted',
+
+  // ── Hub: org onboarding funnel + lifecycle + plan (SaaS) ─────────────────
+  OnboardingStarted = 'onboarding_started',
+  OnboardingUseTypeSelected = 'onboarding_use_type_selected',
+  OnboardingPlanSelected = 'onboarding_plan_selected',
+  OrgFormStarted = 'onboarding_org_form_started',
+  OrgCreateSubmitted = 'onboarding_org_create_submitted',
+  OrgCreated = 'onboarding_org_created',
+  OrgCreateFailed = 'onboarding_org_create_failed',
+  OrgDeleteInitiated = 'org_delete_initiated',
+  OrgDeleted = 'org_deleted',
+  PlanPageViewed = 'plan_page_viewed',
+
+  // ── Store & checkout (buyer) ─────────────────────────────────────────────
+
+  // ── Course management (creator) ──────────────────────────────────────────
+  CourseCreated = 'course_created',
+  CoursePublishedToggled = 'course_published_toggled',
+  CourseChangesSaved = 'course_changes_saved',
+  ChapterCreated = 'chapter_created',
+  ActivityCreated = 'activity_created',
+  ActivityFileUploaded = 'activity_file_uploaded',
+  CourseAccessChanged = 'course_access_changed',
+  CourseStructureReordered = 'course_structure_reordered',
+
+  // ── Content editor ────────────────────────────────────────
+  ActivityEditorOpened = 'activity_editor_opened',
+  ActivityContentSaved = 'activity_content_saved',
+  EditorBlockInserted = 'editor_block_inserted',
+
+  // ── Assignments (creator + grading) ──────────────────────────────────────
+  AssignmentCreated = 'assignment_created',
+  AssignmentPublishToggled = 'assignment_publish_toggled',
+  AssignmentTaskCreated = 'assignment_task_created',
+  AssignmentSubmissionsViewed = 'assignment_submissions_viewed',
+  SubmissionEvaluateOpened = 'submission_evaluate_opened',
+  SubmissionGraded = 'submission_graded',
+  SubmissionFinalized = 'submission_finalized',
+
+  // ── Org settings & admin config ──────────────────────────────────────────
+  SignupMechanismChanged = 'signup_mechanism_changed',
+  InviteCodeCreated = 'invite_code_created',
+  MembersBatchInvited = 'members_batch_invited',
+  ApiTokenCreated = 'api_token_created',
+  ApiTokenRevoked = 'api_token_revoked',
+  CustomDomainAdded = 'custom_domain_added',
+  CustomDomainVerified = 'custom_domain_verified',
+  SsoConfigSaved = 'sso_config_saved',
+  OrgGeneralSettingsUpdated = 'org_general_settings_updated',
+  UsergroupCreated = 'usergroup_created',
+  WebhookCreated = 'webhook_created',
+
+  // ── Billing, upgrade & feature gates ─────────────────────────────────────
+  FeatureGateUpgradeShown = 'feature_gate_upgrade_shown',
+  FeatureGateUpgradeClicked = 'feature_gate_upgrade_clicked',
+  UpgradePlanSelected = 'upgrade_plan_selected',
+
+  // Super-admin (/admin) is intentionally NOT tracked; see PostHogAdminGuard.
+
+  // ── Global navigation & cross-cutting ────────────────────────────────────
+  CommandPaletteOpened = 'command_palette_opened',
+  CommandPaletteResultSelected = 'command_palette_result_selected',
+  DashboardNavClicked = 'dashboard_nav_clicked',
+  DashboardEntered = 'dashboard_entered',
+  ErrorViewShown = 'error_view_shown',
+  NotFoundViewShown = 'not_found_view_shown',
+}
+
+/**
+ * Canonical PostHog names for events whose backend wire name diverges from the
+ * `object_action` convention. Consulted by the hook before posthog.capture().
+ */
+export const POSTHOG_NAME_OVERRIDES: Partial<Record<AnalyticsEvent, string>> = {
+  [AnalyticsEvent.CourseViewed]: 'course_viewed',
+  [AnalyticsEvent.ActivityViewed]: 'activity_viewed',
+}
+
+/**
+ * Events the backend accepts from the browser (`POST /signals/batch`). Only
+ * these are sent there; everything else is PostHog-only. Must stay in step
+ * with the web events in the API catalog.
+ */
+export const BACKEND_EVENTS: ReadonlySet<AnalyticsEvent> = new Set([
+  // Accepted from visitors who aren't signed in too
+  AnalyticsEvent.PageViewed,
+  AnalyticsEvent.CourseViewed,
+  AnalyticsEvent.ActivityViewed,
+  AnalyticsEvent.SearchQuery,
+  AnalyticsEvent.CourseShared,
+  AnalyticsEvent.CommunityViewed,
+  AnalyticsEvent.PathViewed,
+  AnalyticsEvent.CertificateViewed,
+  // Signed-in org members only
+  AnalyticsEvent.TimeOnActivity,
+  AnalyticsEvent.VideoProgress,
+])
+
+/** Backend events the API only keeps for signed-in members. */
+export const MEMBER_ONLY_BACKEND_EVENTS: ReadonlySet<AnalyticsEvent> = new Set([
+  AnalyticsEvent.TimeOnActivity,
+  AnalyticsEvent.VideoProgress,
+])
+
+/**
+ * Backend events that are not sent to PostHog: PostHog already gets the same
+ * moment from another event (native $pageview, search_executed,
+ * episode_played), or it's too chatty to be worth the volume there.
+ */
+export const BACKEND_ONLY_EVENTS: ReadonlySet<AnalyticsEvent> = new Set([
+  AnalyticsEvent.PageViewed,
+  AnalyticsEvent.SearchQuery,
+  AnalyticsEvent.VideoProgress,
+])
+
+/**
+ * Coarse feature group for an event, attached as the `feature` property so
+ * events can be filtered/rolled-up by area in PostHog. Derived from the name
+ * prefix; falls back to 'other'.
+ */
+const GROUP_PREFIXES: Array<[string, string[]]> = [
+  ['auth', ['signup_', 'login_', 'logout_', 'onboarding_', 'email_verification_', 'password_reset_', 'google_oauth_', 'sso_callback', 'join_org', 'org_joined', 'org_selected']],
+  ['course', ['course_', 'chapter_']],
+  ['activity', ['activity_', 'focus_mode', 'quiz_', 'video_']],
+  ['assignment', ['assignment_', 'submission_', 'task_']],
+  ['community', ['community_', 'communities_', 'discussion_', 'comment_']],
+  ['playground', ['playground_']],
+  ['board', ['board_']],
+  ['library', ['library_', 'folder_', 'media_', 'resource_', 'usergroup_']],
+  ['path', ['path_']],
+  ['search', ['search_']],
+  ['certificate', ['certificate_', 'trail_']],
+  ['account', ['account_']],
+  ['editor', ['editor_', 'magic_block_', 'ai_editor_']],
+  ['org_settings', ['invite_', 'members_', 'api_token_', 'custom_domain_', 'sso_config', 'org_general', 'webhook_', 'signup_mechanism']],
+  ['admin', ['organization_', 'superadmin_', 'admin_', 'global_analytics']],
+  ['navigation', ['command_palette_', 'dashboard_nav', 'dashboard_entered', 'error_view', 'not_found', 'language_changed', 'feedback_']],
+]
+
+export function featureGroupOf(event: AnalyticsEvent | string): string {
+  const name = String(event)
+  for (const [group, prefixes] of GROUP_PREFIXES) {
+    if (prefixes.some((p) => name.startsWith(p))) return group
+  }
+  return 'other'
+}

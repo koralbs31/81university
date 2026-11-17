@@ -1,0 +1,69 @@
+site_name: LearnHouse
+site_description: LearnHouse is an open-source platform tailored for learning experiences.
+contact_email: hello@learnhouse.app
+
+# This config is optimized for local development. You can change the values according to your needs.
+
+general:
+  # SECURITY: default to production-safe; enable with LEARNHOUSE_DEVELOPMENT_MODE=true for local dev.
+  development_mode: false
+
+security:
+  # SECURITY: Set via LEARNHOUSE_AUTH_JWT_SECRET_KEY env var (required, min 32 chars).
+  # Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
+  auth_jwt_secret_key: ""
+
+hosting_config:
+  # tenancy: "single" (default) serves the default org on any host (localhost
+  # or self-hosted VPS). "multi" enables slug.{domain} subdomain detection and
+  # requires the EE folder. Override with LEARNHOUSE_TENANCY.
+  tenancy: single
+  domain: localhost:3000
+  frontend_domain: localhost:3000
+  ssl: false
+  port: 1338
+  allowed_origins:
+    - http://localhost:3000
+    - http://localhost:3001
+  cookies_config:
+    domain: ".localhost"
+  # This one value is read by three consumers: CORS (core/middleware/cors.py),
+  # CSRF (security/csrf.py) and the base URL of emailed login / verification
+  # links (services/email/utils.py). The default below is a catch-all, which
+  # means CORS and CSRF are effectively open unless you scope it. Set
+  # LEARNHOUSE_ALLOWED_REGEXP to your own domain in any real deployment, e.g.
+  # '^https://(?:[a-z0-9-]+\.)*example\.com$'.
+  #
+  # Narrowing this default is deliberately NOT done here: it would CORS-block
+  # and CSRF-403 every deployment that relies on it. Email links do not depend
+  # on it being scoped; services/email/utils.py ignores a catch-all pattern
+  # and validates the Origin against the configured domain, its subdomains and
+  # the verified custom domains instead.
+  allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
+  content_delivery:
+    type: "filesystem" # "filesystem" or "s3api"
+    s3api:
+      bucket_name: ""
+      endpoint_url: ""
+
+mailing_config:
+  email_provider: "resend" # "resend" or "smtp"
+  system_email_address: ""
+  resend_api_key: ""
+  smtp_host: ""
+  smtp_port: 587
+  smtp_username: ""
+  smtp_password: ""
+  smtp_use_tls: true
+
+database_config:
+  sql_connection_string: postgresql://learnhouse:learnhouse@localhost:5432/learnhouse
+
+redis_config:
+  redis_connection_string: redis://localhost:6379/learnhouse
+
+tinybird_config:
+  # Legacy: only read by the Enterprise one-time import of old Tinybird analytics data
+  api_url: ""
+  ingest_token: ""
+  read_token: ""

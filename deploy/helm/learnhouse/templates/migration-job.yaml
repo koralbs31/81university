@@ -1,0 +1,52 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-migrate
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.migration.ttlSecondsAfterFinished }}
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: migrate
+          image: {{ printf "%s:%s" .Values.api.image.repository .Values.api.image.tag | quote }}
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          command: [".venv/bin/python", "scripts/prepare_deployment.py"]
+          # Pre-install runs before the release ConfigMap exists. Inline its data.
+          env:
+            {{- $config := include "learnhouse.config" . | fromYaml }}
+            {{- $storage := pick $config "LEARNHOUSE_CONTENT_DELIVERY_TYPE" "LEARNHOUSE_S3_API_REGION" "AWS_DEFAULT_REGION" }}
+            {{- $env := mergeOverwrite (deepCopy $config) .Values.api.env $storage }}
+            {{- range $key, $value := $env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ required "api.existingSecret is required" .Values.api.existingSecret }}
+            - secretRef:
+                name: {{ required "migration.bootstrapExistingSecret is required" .Values.migration.bootstrapExistingSecret }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+{{- end }}
