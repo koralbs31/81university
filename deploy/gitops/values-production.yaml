@@ -4,7 +4,7 @@ api:
   replicas: 1
   image:
     repository: ghcr.io/koralbs31/81university-api
-    tag: cd8963a22dc3d598f9b7de21e0bd8c516aed680d
+    tag: 3ddd97b5e458522f222e397da3cdccffbbe10cba
     pullPolicy: IfNotPresent
   env:
     FORWARDED_ALLOW_IPS: 10.42.0.0/16
@@ -12,7 +12,7 @@ web:
   replicas: 1
   image:
     repository: ghcr.io/koralbs31/81university-web
-    tag: cd8963a22dc3d598f9b7de21e0bd8c516aed680d
+    tag: 3ddd97b5e458522f222e397da3cdccffbbe10cba
     pullPolicy: IfNotPresent
   existingSecret: ''
 contentStorage:
