@@ -1,16 +1,16 @@
 'use client'
 import Link from 'next/link'
-import React, { useEffect, useState, Suspense } from 'react'
+import React, { useEffect, useRef, useState, Suspense } from 'react'
 import { getUriWithOrg } from '@services/config/config'
 import { getCourseMetadata } from '@services/courses/courses'
-import { useTrail } from '@/hooks/queries/useTrail'
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
+import { useTrail } from '@/hooks/queries/useTrail'
 import { useRouter } from 'next/navigation'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import {
   getCourseThumbnailMediaDirectory,
 } from '@services/media/media'
-import { ArrowRight, Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Layers, BookCopy, Lock, Globe, Package, Puzzle, Gem, Eye, Radio } from 'lucide-react'
+import { ArrowDown, ArrowRight, Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Layers, BookCopy, Lock, Globe, Package, Puzzle, Gem, Eye, Radio } from 'lucide-react'
 
 import { MarkdownLogo } from '@phosphor-icons/react'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -38,6 +38,8 @@ import ThumbnailImage from '@components/Objects/Thumbnails/ThumbnailImage'
 
 const CourseClient = (props: any) => {
   const { t } = useTranslation()
+  const lessonScrollRef = useRef<HTMLDivElement>(null)
+  const [hasMoreChapters, setHasMoreChapters] = useState(false)
   const [learnings, setLearnings] = useState<any>([])
   const [expandedChapters, setExpandedChapters] = useState<{[key: string]: boolean}>({})
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image')
@@ -113,75 +115,38 @@ const CourseClient = (props: any) => {
     }
   }, [course])
 
+  useEffect(() => {
+    const viewport = lessonScrollRef.current
+    const content = viewport?.firstElementChild
+    if (!viewport || !content) return
+    const updateScrollHint = () => setHasMoreChapters(
+      viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop > 2
+    )
+    const observer = new ResizeObserver(updateScrollHint)
+    observer.observe(viewport)
+    observer.observe(content)
+    viewport.addEventListener('scroll', updateScrollHint, { passive: true })
+    updateScrollHint()
+    return () => {
+      observer.disconnect()
+      viewport.removeEventListener('scroll', updateScrollHint)
+    }
+  }, [course, org])
+
   // Show loading state if fetching course data client-side
   if (!initialCourse && !serverError && courseLoading) {
     return (
       <GeneralWrapperStyled>
-        <div className="animate-pulse">
-          {/* Breadcrumb placeholder */}
-          <div className="pb-4 flex items-center gap-2">
-            <div className="h-3 bg-gray-200 rounded w-16" />
-            <div className="h-3 bg-gray-200 rounded w-2" />
-            <div className="h-3 bg-gray-200 rounded w-32" />
-          </div>
-
-          {/* Course title + share row */}
-          <div className="pb-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <div className="animate-pulse grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)_300px] xl:grid-cols-[340px_minmax(0,1fr)_320px]">
+          <div className="rounded-lg bg-gray-100 h-96" />
+          <div className="space-y-4">
             <div className="h-9 bg-gray-200 rounded w-2/3" />
-            <div className="h-8 bg-gray-200 rounded-lg w-24" />
+            <div className="h-4 bg-gray-100 rounded w-full" />
+            <div className="h-4 bg-gray-100 rounded w-5/6" />
           </div>
-
-          {/* Main content: left 3/4 + right 1/4 sidebar */}
-          <div className="flex flex-col md:flex-row gap-8 pt-2">
-            {/* Left column */}
-            <div className="w-full md:w-3/4 space-y-4">
-              {/* Thumbnail */}
-              <div className="bg-gray-200 rounded-lg w-full h-[200px] md:h-[400px]" />
-              {/* About text block */}
-              <div className="space-y-2 py-2">
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-5/6" />
-                <div className="h-3 bg-gray-200 rounded w-4/6" />
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-3/4" />
-              </div>
-            </div>
-
-            {/* Right sidebar */}
-            <div className="w-full md:w-1/4 space-y-4">
-              {/* Actions box */}
-              <div className="bg-gray-200 rounded-lg h-40" />
-              {/* Authors box */}
-              <div className="bg-gray-200 rounded-lg h-24" />
-            </div>
-          </div>
-
-          {/* Chapter list */}
-          <div className="w-full my-5 mb-10">
-            <div className="h-7 bg-gray-200 rounded w-40 mb-5" />
-            <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden">
-              {Array.from({ length: 3 }).map((_, chIdx) => (
-                <div key={chIdx}>
-                  {/* Chapter header */}
-                  <div className="flex items-center gap-3 py-4 px-4 bg-neutral-50 outline outline-1 outline-neutral-200/40">
-                    <div className="h-5 w-5 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="h-5 bg-gray-200 rounded w-5 flex-shrink-0" />
-                    <div className="h-5 bg-gray-200 rounded w-1/3" />
-                  </div>
-                  {/* Activity rows: only expand first chapter */}
-                  {chIdx === 0 && Array.from({ length: 3 }).map((_, aIdx) => (
-                    <div key={aIdx} className="flex items-center gap-3 px-4 py-4 border-t border-neutral-100">
-                      <div className="h-4 w-4 bg-gray-200 rounded flex-shrink-0" />
-                      <div className="flex-1 space-y-1.5">
-                        <div className="h-4 bg-gray-200 rounded w-1/2" />
-                        <div className="h-3 bg-gray-200 rounded w-20" />
-                      </div>
-                      <div className="h-4 w-4 bg-gray-200 rounded flex-shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+          <div className="space-y-4">
+            <div className="bg-gray-200 rounded-lg w-full aspect-video" />
+            <div className="bg-gray-100 rounded-lg h-40" />
           </div>
         </div>
       </GeneralWrapperStyled>
@@ -360,6 +325,8 @@ const CourseClient = (props: any) => {
                 { label: course.name }
               ]} />
             </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)_300px] lg:items-start xl:grid-cols-[340px_minmax(0,1fr)_320px]">
+              <div className="min-w-0 order-1 lg:col-start-2 lg:row-start-1">
             <div className="pb-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
               <h1 className="text-3xl max-sm:text-[26px] max-sm:leading-tight font-bold" dir="auto">{course.name}</h1>
               <div className="flex items-center gap-2">
@@ -372,148 +339,12 @@ const CourseClient = (props: any) => {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-5 md:gap-8 pt-2">
-              <div className="w-full md:w-3/4 space-y-4">
-                {(() => {
-                  const showVideo = course.thumbnail_type === 'video' || (course.thumbnail_type === 'both' && activeThumbnailType === 'video');
-                  const showImage = course.thumbnail_type === 'image' || (course.thumbnail_type === 'both' && activeThumbnailType === 'image') || !course.thumbnail_type;
-
-                  if (showVideo && course.thumbnail_video) {
-                    return (
-                      <div className="relative inset-0 ring-1 ring-inset ring-black/10 max-sm:-mx-4 max-sm:w-auto max-sm:rounded-none max-sm:ring-0 max-sm:shadow-none rounded-lg shadow-xl w-full aspect-video sm:aspect-auto sm:h-[200px] md:h-[400px]">
-                        {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 end-3 z-10">
-                            <div className="bg-black/20 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
-                              <button
-                                onClick={() => setActiveThumbnailType('image')}
-                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                                  activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <ImageIcon size={12} className="me-1" />
-                                {t('courses.image')}
-                              </button>
-                              <button
-                                onClick={() => setActiveThumbnailType('video')}
-                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                                  activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <Video size={12} className="me-1" />
-                                {t('activities.video')}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        <div className="w-full h-full">
-                          <video
-                            src={getCourseThumbnailMediaDirectory(
-                              org?.org_uuid,
-                              course?.course_uuid,
-                              course?.thumbnail_video
-                            )}
-                            className="w-full h-full bg-black sm:rounded-lg"
-                            controls
-                            autoPlay
-                            muted
-                            preload="metadata"
-                            playsInline
-                          />
-                        </div>
-                      </div>
-                    );
-                  } else if (showImage && course.thumbnail_image) {
-                    return (
-                      <div className="relative overflow-hidden ring-1 ring-black/10 max-sm:-mx-4 max-sm:w-auto max-sm:rounded-none max-sm:ring-0 max-sm:shadow-none rounded-lg shadow-xl w-full aspect-video sm:aspect-auto sm:h-[200px] md:h-[400px] bg-gray-50">
-                        <ThumbnailImage
-                          src={getCourseThumbnailMediaDirectory(org?.org_uuid, course?.course_uuid, course?.thumbnail_image)}
-                          fetchPriority="high"
-                          loading="eager"
-                          className="absolute inset-0 w-full h-full"
-                        />
-                        {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 end-3 z-10">
-                            <div className="bg-black/20 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
-                              <button
-                                onClick={() => setActiveThumbnailType('image')}
-                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                                  activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <ImageIcon size={12} className="me-1" />
-                                {t('courses.image')}
-                              </button>
-                              <button
-                                onClick={() => setActiveThumbnailType('video')}
-                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                                  activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <Video size={12} className="me-1" />
-                                {t('activities.video')}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div
-                        className="inset-0 ring-1 ring-inset ring-black/10 max-sm:-mx-4 max-sm:w-auto max-sm:rounded-none rounded-lg shadow-xl relative w-full aspect-video sm:aspect-auto sm:h-[400px] bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url('/empty_thumbnail.png')`,
-                          backgroundSize: 'auto',
-                        }}
-                      ></div>
-                    );
-                  }
-                })()}
-
-                {(() => {
-                  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-                  const run = trailData?.runs?.find(
-                    (run: any) => {
-                      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
-                      return cleanRunCourseUuid === cleanCourseUuid;
-                    }
-                  );
-                  return run;
-                })() && (
-                  <ActivityIndicators
-                    course_uuid={course.course_uuid}
-                    orgslug={orgslug}
-                    course={course}
-                    trailData={trailData}
-                  />
+                {trailData?.runs?.some((run: any) =>
+                  run.course?.course_uuid?.replace('course_', '') === courseuuid.replace('course_', '')
+                ) && (
+                  <ActivityIndicators course_uuid={course.course_uuid} orgslug={orgslug} course={course} trailData={trailData} />
                 )}
-
-                <div className="course_metadata_left space-y-2">
-                  <div className="">
-                    <LinkifiedText text={course.about} className="py-5 whitespace-pre-line break-words w-full leading-relaxed tracking-normal text-pretty hyphens-auto" />
-                  </div>
-                </div>
-              </div>
-
-              <div className='course_metadata_right w-full md:w-1/4 space-y-4'>
-                {/* Actions Box */}
-                <CoursesActions courseuuid={courseuuid} orgslug={orgslug} course={course} trailData={trailData} />
-
-                <CoursePaths courseUuid={course.course_uuid} orgslug={orgslug} />
-
-                {/* Authors & Updates Box */}
-
-              </div>
-            </div>
-
+                <LinkifiedText text={course.about} className="py-5 whitespace-pre-line break-words w-full leading-relaxed tracking-normal text-pretty hyphens-auto" />
             {(() => {
               const displayLearnings = learnings.filter((l: any) => {
                 const text = typeof l === 'string' ? l : l?.text
@@ -560,20 +391,37 @@ const CourseClient = (props: any) => {
               )
             })()}
 
-            <div className="w-full my-5 mb-10">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="py-5 text-xl md:text-2xl font-bold">{t('courses.course_lessons')}</h2>
+              </div>
+              <aside aria-label={t('courses.course_lessons')} className="min-w-0 order-3 lg:col-start-1 lg:row-start-1 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:flex lg:flex-col">
+              <div className="shrink-0 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="py-3 text-xl font-bold">{t('courses.course_lessons')}</h2>
                 {chapters.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setAllChapters(!allChaptersExpanded)}
-                    className="hidden sm:inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-black/50 transition-colors hover:bg-black/5 hover:text-black/75"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-black/50 transition-colors hover:bg-black/5 hover:text-black/75"
                   >
                     {allChaptersExpanded ? t('shortcuts.collapse_chapters') : t('shortcuts.expand_chapters')}
                     <Keys keys="e" tone="muted" />
                   </button>
                 )}
               </div>
+                <p className="text-xs text-neutral-500">
+                  {t('courses.chapter_count', { count: chapters.length })}
+                  {' · '}
+                  {t('courses.lesson_count', { count: chapters.reduce((sum: number, chapter: any) => sum + chapter.activities.length, 0) })}
+                </p>
+              </div>
+              <div className="relative min-h-0 lg:flex-1">
+                <div
+                  ref={lessonScrollRef}
+                  tabIndex={0}
+                  role="region"
+                  aria-label={t('courses.course_lessons')}
+                  className="course-lessons-scroll rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500 lg:max-h-[calc(100dvh-13rem)] lg:overflow-y-scroll lg:overscroll-contain lg:pe-2"
+                >
+                <div>
               {nextDrip && (
                 <div
                   data-testid="drip-banner"
@@ -627,7 +475,7 @@ const CourseClient = (props: any) => {
                             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-neutral-200 text-neutral-600 text-xs font-semibold me-2 border border-neutral-300 flex-shrink-0">
                               {idx + 1}
                             </span>
-                            <h3 className="text-lg font-bold leading-tight truncate min-w-0 sm:text-base md:text-lg" style={{lineHeight: '1.2'}}>{chapter.name}</h3>
+                            <h3 className="text-sm font-bold leading-tight min-w-0 break-words" style={{lineHeight: '1.2'}}>{chapter.name}</h3>
                             {chapter.drip_locked ? (
                               <DripBadge className="ms-2" drip_reason={chapter.drip_reason} drip_unlock_at={chapter.drip_unlock_at} drip_closes_at={chapter.drip_closes_at} />
                             ) : chapter.drip_closes_at && !chapter.is_locked ? (
@@ -672,9 +520,9 @@ const CourseClient = (props: any) => {
                                     </div>
                                   )}
                                 </div>
-                                <div className="flex flex-col grow">
+                                <div className="flex flex-col grow min-w-0">
                                   <div className="flex items-center space-x-2 w-full">
-                                    <p className={`font-semibold transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
+                                    <p className={`text-sm font-semibold break-words transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
                                     {locked && !dripped && (
                                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
                                         <Lock size={10} />
@@ -736,6 +584,129 @@ const CourseClient = (props: any) => {
                   )
                 })}
               </div>
+                </div>
+                </div>
+                {hasMoreChapters && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-20 items-end justify-center bg-gradient-to-t from-white via-white/90 to-transparent pb-3 lg:flex">
+                    <button
+                      type="button"
+                      onClick={() => lessonScrollRef.current?.scrollBy({ top: lessonScrollRef.current.clientHeight * 0.7, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}
+                      className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-neutral-500"
+                    >
+                      {t('courses.more_chapters')}
+                      <ArrowDown size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              </aside>
+              <aside aria-label={t('courses.start_course')} className="min-w-0 order-2 space-y-4 lg:col-start-3 lg:row-start-1 lg:sticky lg:top-24">
+                {(() => {
+                  const showVideo = course.thumbnail_type === 'video' || (course.thumbnail_type === 'both' && activeThumbnailType === 'video');
+                  const showImage = course.thumbnail_type === 'image' || (course.thumbnail_type === 'both' && activeThumbnailType === 'image') || !course.thumbnail_type;
+
+                  if (showVideo && course.thumbnail_video) {
+                    return (
+                      <div className="relative overflow-hidden rounded-lg ring-1 ring-black/10 w-full aspect-video">
+                        {course.thumbnail_type === 'both' && (
+                          <div className="absolute top-3 end-3 z-10">
+                            <div className="bg-black/20 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
+                              <button
+                                onClick={() => setActiveThumbnailType('image')}
+                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                                  activeThumbnailType === 'image'
+                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <ImageIcon size={12} className="me-1" />
+                                {t('courses.image')}
+                              </button>
+                              <button
+                                onClick={() => setActiveThumbnailType('video')}
+                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                                  activeThumbnailType === 'video'
+                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <Video size={12} className="me-1" />
+                                {t('activities.video')}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        <div className="w-full h-full">
+                          <video
+                            src={getCourseThumbnailMediaDirectory(
+                              org?.org_uuid,
+                              course?.course_uuid,
+                              course?.thumbnail_video
+                            )}
+                            className="w-full h-full bg-black sm:rounded-lg"
+                            controls
+                            autoPlay
+                            muted
+                            preload="metadata"
+                            playsInline
+                          />
+                        </div>
+                      </div>
+                    );
+                  } else if (showImage && course.thumbnail_image) {
+                    return (
+                      <div className="relative overflow-hidden rounded-lg ring-1 ring-black/10 w-full aspect-video bg-gray-50">
+                        <ThumbnailImage
+                          src={getCourseThumbnailMediaDirectory(org?.org_uuid, course?.course_uuid, course?.thumbnail_image)}
+                          fetchPriority="high"
+                          loading="eager"
+                          className="absolute inset-0 w-full h-full"
+                        />
+                        {course.thumbnail_type === 'both' && (
+                          <div className="absolute top-3 end-3 z-10">
+                            <div className="bg-black/20 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
+                              <button
+                                onClick={() => setActiveThumbnailType('image')}
+                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                                  activeThumbnailType === 'image'
+                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <ImageIcon size={12} className="me-1" />
+                                {t('courses.image')}
+                              </button>
+                              <button
+                                onClick={() => setActiveThumbnailType('video')}
+                                className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                                  activeThumbnailType === 'video'
+                                    ? 'bg-white/90 text-gray-900 shadow-sm'
+                                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <Video size={12} className="me-1" />
+                                {t('activities.video')}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="relative rounded-lg ring-1 ring-black/10 w-full aspect-video bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url('/empty_thumbnail.png')`,
+                          backgroundSize: 'auto',
+                        }}
+                      ></div>
+                    );
+                  }
+                })()}
+                <CoursesActions courseuuid={courseuuid} orgslug={orgslug} course={course} trailData={trailData} />
+                <CoursePaths courseUuid={course.course_uuid} orgslug={orgslug} />
+              </aside>
             </div>
 
             {/* Community Section */}
