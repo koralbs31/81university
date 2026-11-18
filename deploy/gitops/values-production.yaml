@@ -14,7 +14,7 @@ web:
     repository: ghcr.io/koralbs31/81university-web
     tag: 3fb24bb096c615bc80e949d9c749d071bd78d6fa
     pullPolicy: IfNotPresent
-  existingSecret: ''
+  existingSecret: learnhouse-web-secrets
 contentStorage:
   region: auto
 ingress:
