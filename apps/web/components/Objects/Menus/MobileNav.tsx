@@ -375,6 +375,7 @@ function MobileMoreSheet({
               ))}
             <SheetRow href="https://github.com/koralbs31/81university" external Icon={Browser} label={t('common.software_source')} />
             <SheetRow href="/software-notices" Icon={Book} label="AGPL-3.0" />
+            <SheetRow href="/accessibility" Icon={Book} label={t('accessibility.statement')} />
             {isAuthenticated && (
               <SheetRow
                 onClick={() => {

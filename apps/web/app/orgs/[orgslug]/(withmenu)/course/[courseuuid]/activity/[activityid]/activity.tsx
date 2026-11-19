@@ -506,7 +506,7 @@ function ActivityClient(props: ActivityClientProps) {
           <h1 className="text-xl font-semibold text-gray-900 mb-2">
             {t('course.locked_title', 'This activity is locked')}
           </h1>
-          <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
             {isAuthenticated
                 ? t('course.locked_restricted', 'You need to be a member of the right user group to access this. Ask a course admin to add you.')
                 : t('course.locked_auth_required', 'You need to sign in to access this activity.')}
@@ -565,7 +565,7 @@ function ActivityClient(props: ActivityClientProps) {
                 : '/empty_thumbnail.png'} onError={(e) => {
                 if (!e.currentTarget.src.endsWith('/empty_thumbnail.png'))
                     e.currentTarget.src = '/empty_thumbnail.png';
-            }} alt=""/>
+            }} alt={course.name}/>
                             </Link>
                           </div>
                           <div className="flex flex-col -space-y-1">
@@ -613,11 +613,11 @@ function ActivityClient(props: ActivityClientProps) {
                           <div className="flex items-center space-x-2">
                             <button onClick={() => navigateToActivity(prevActivity)} className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${prevActivity
                     ? 'text-gray-700'
-                    : 'opacity-50 text-gray-400 cursor-not-allowed'}`} disabled={!prevActivity} title={prevActivity ? `${t('common.previous')}: ${prevActivity.name}` : t('activities.no_previous_activity')}>
+                    : 'opacity-50 text-gray-600 cursor-not-allowed'}`} disabled={!prevActivity} title={prevActivity ? `${t('common.previous')}: ${prevActivity.name}` : t('activities.no_previous_activity')}>
                               <ChevronLeft size={20} className="text-gray-800 shrink-0"/>
                               <Keys keys="k" tone="muted" className="hidden sm:inline-flex"/>
                               <div className="flex flex-col items-start">
-                                <span className="text-xs text-gray-500">{t('common.previous')}</span>
+                                <span className="text-xs text-gray-600">{t('common.previous')}</span>
                                 <span className="text-sm capitalize font-semibold text-start">
                                   {prevActivity ? prevActivity.name : t('activities.no_previous_activity')}
                                 </span>
@@ -628,13 +628,13 @@ function ActivityClient(props: ActivityClientProps) {
                             <ActivityActions activity={activity} activityid={activityid} course={course} orgslug={orgslug} assignment={assignment} showNavigation={false} trailData={trailData}/>
                             <button onClick={() => navigateToActivity(nextActivity)} className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${nextActivity || isLastActivity
                     ? 'text-gray-700'
-                    : 'opacity-50 text-gray-400 cursor-not-allowed'}`} disabled={!nextActivity && !isLastActivity} title={nextActivity
+                    : 'opacity-50 text-gray-600 cursor-not-allowed'}`} disabled={!nextActivity && !isLastActivity} title={nextActivity
                     ? `${t('common.next')}: ${nextActivity.name}`
                     : isLastActivity
                         ? t('course.finish_course', 'Finish course')
                         : t('activities.no_next_activity')}>
                               <div className="flex flex-col items-end">
-                                <span className="text-xs text-gray-500">{t('common.next')}</span>
+                                <span className="text-xs text-gray-600">{t('common.next')}</span>
                                 <span className="text-sm capitalize font-semibold text-end">
                                   {nextActivity
                     ? nextActivity.name
@@ -657,13 +657,13 @@ function ActivityClient(props: ActivityClientProps) {
                     {/* Phones: one back row to the course instead of the
                 breadcrumb trail and the course header below. */}
                     <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}`)} className="sm:hidden lh-press -ms-1 flex items-center gap-2 min-h-[44px] pe-2 min-w-0">
-                      <BackIcon size={20} className="shrink-0 text-gray-500 rtl:rotate-180"/>
+                      <BackIcon size={20} className="shrink-0 text-gray-600 rtl:rotate-180"/>
                       <img className="w-[44px] h-[25px] shrink-0 rounded object-cover ring-1 ring-black/5" src={course.thumbnail_image
                     ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
                     : '/empty_thumbnail.png'} onError={(e) => {
                     if (!e.currentTarget.src.endsWith('/empty_thumbnail.png'))
                         e.currentTarget.src = '/empty_thumbnail.png';
-                }} alt=""/>
+                }} alt={course.name}/>
                       <span className="truncate text-sm font-semibold text-gray-700">{course.name}</span>
                     </Link>
                     <div className="hidden sm:block pt-2 pb-6">
@@ -683,7 +683,7 @@ function ActivityClient(props: ActivityClientProps) {
                     : '/empty_thumbnail.png'} onError={(e) => {
                     if (!e.currentTarget.src.endsWith('/empty_thumbnail.png'))
                         e.currentTarget.src = '/empty_thumbnail.png';
-                }} alt=""/>
+                }} alt={course.name}/>
                               </Link>
                             </div>
                             <div className="flex flex-col -space-y-1">
@@ -703,7 +703,7 @@ function ActivityClient(props: ActivityClientProps) {
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-3">
                           <div className="flex flex-1 items-center space-x-3 min-w-0">
                             <div className="flex flex-col -space-y-1 min-w-0">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md max-sm:font-semibold max-sm:text-gray-500 max-sm:text-[11px] max-sm:uppercase max-sm:tracking-wide">
+                              <p className="font-bold text-gray-700 text-xs sm:text-md max-sm:font-semibold max-sm:text-gray-600 max-sm:text-[11px] max-sm:uppercase max-sm:tracking-wide">
                                 {getChapterNameByActivityId(course, activity?.id) ?? chapterNameFromCourse}
                               </p>
                               <h1 className="font-bold text-gray-950 text-base sm:text-2xl max-sm:text-[22px] max-sm:leading-tight max-sm:pt-1">
@@ -745,7 +745,7 @@ function ActivityClient(props: ActivityClientProps) {
                                       </ToolTip>)}
                                   </div>)}
                                 {/* Dates */}
-                                <div className="hidden sm:flex flex-wrap items-center text-xs text-gray-500 gap-1 sm:gap-2">
+                                <div className="hidden sm:flex flex-wrap items-center text-xs text-gray-600 gap-1 sm:gap-2">
                                   <span>
                                     {t('courses.created_on')} {formatDate(course.creation_date, i18n.language, { dateStyle: undefined, year: 'numeric', month: 'long', day: 'numeric' })}
                                   </span>
@@ -762,7 +762,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 {activity.activity_type != 'TYPE_ASSIGNMENT' && (<>
                                     {null}
                                     <ActivityChapterDropdown course={course} currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')} orgslug={orgslug} trailData={trailData}/>
-                                    {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (<Link href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}/activity/${activityid}/edit`} className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+                                    {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (<Link href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}/activity/${activityid}/edit`} className="bg-emerald-700 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
                                         <Edit2 size={17}/>
                                         <span className="text-xs font-bold">{t('courses.contribute')}</span>
                                       </Link>)}
@@ -1138,7 +1138,7 @@ function NextActivityButton({ course, currentActivityId, orgslug, dark = false }
     return (<div onClick={navigateToActivity} className={`rounded-md px-3 sm:px-4 flex flex-col p-2 sm:p-2.5 hover:cursor-pointer transition delay-150 duration-300 ease-in-out ${dark
             ? 'bg-white/10 text-white ring-1 ring-white/10 hover:bg-white/15'
             : 'bg-gray-200 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] text-gray-600 hover:bg-gray-200'}`}>
-      <span className={`text-[10px] font-bold mb-1 uppercase ${dark ? 'text-white/50' : 'text-gray-500'}`}>{t('common.next')}</span>
+      <span className={`text-[10px] font-bold mb-1 uppercase ${dark ? 'text-white/75' : 'text-gray-600'}`}>{t('common.next')}</span>
       <div className="flex items-center space-x-1">
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">
           {isLastActivity ? t('course.finish_course', 'Finish course') : nextActivity.name}
@@ -1185,7 +1185,7 @@ function PreviousActivityButton({ course, currentActivityId, orgslug, dark = fal
         router.push(getUriWithOrg(orgslug, '') + `/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
     };
     return (<div onClick={navigateToActivity} className={`rounded-md px-3 sm:px-4 flex flex-col p-2 sm:p-2.5 hover:cursor-pointer transition delay-150 duration-300 ease-in-out ${dark ? 'bg-white/5 text-white/85 ring-1 ring-white/10 hover:bg-white/10' : 'bg-white nice-shadow text-gray-600'}`}>
-      <span className={`text-[10px] font-bold mb-1 uppercase ${dark ? 'text-white/50' : 'text-gray-500'}`}>{t('common.previous')}</span>
+      <span className={`text-[10px] font-bold mb-1 uppercase ${dark ? 'text-white/75' : 'text-gray-600'}`}>{t('common.previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} className="shrink-0"/>
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{previousActivity.name}</span>
@@ -1516,7 +1516,7 @@ function AssignmentTools(props: {
                     <h2 className="text-5xl font-black text-gray-900 tracking-tight leading-none">
                       {displayGrade}
                     </h2>
-                    {(pointsSummary || percentageDisplay) && (<p className="text-sm text-gray-500 font-medium pt-1">
+                    {(pointsSummary || percentageDisplay) && (<p className="text-sm text-gray-600 font-medium pt-1">
                         {[percentageDisplay, pointsSummary].filter(Boolean).join(' · ')}
                       </p>)}
                   </div>
@@ -1526,7 +1526,7 @@ function AssignmentTools(props: {
               {/* Body */}
               <div className="px-6 pt-5 pb-6 space-y-5">
                 {tasks && tasks.length > 0 && (<div className="space-y-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-600">
                       {t('assignments.task_breakdown')}
                     </p>
                     <div className="space-y-1.5">
@@ -1543,11 +1543,11 @@ function AssignmentTools(props: {
                             {tb.submitted && (<div className={`absolute inset-y-0 start-0 transition-all ${passedTask ? 'bg-emerald-100/70' : 'bg-rose-100/70'}`} style={{ width: `${pct}%` }}/>)}
                             <div className="relative flex items-center justify-between gap-3">
                               <span className="text-sm text-gray-700 truncate" title={tb.description || `Task ${tb.index}`}>
-                                <span className="font-bold text-gray-400 me-1.5">{tb.index}.</span>
+                                <span className="font-bold text-gray-600 me-1.5">{tb.index}.</span>
                                 {tb.description || `Task ${tb.index}`}
                               </span>
                               <span className={`text-xs font-bold flex-none ${!tb.submitted
-                                ? 'text-gray-400'
+                                ? 'text-gray-600'
                                 : passedTask
                                     ? 'text-emerald-700'
                                     : 'text-rose-700'}`}>
@@ -1560,7 +1560,7 @@ function AssignmentTools(props: {
                   </div>)}
 
                 {feedback && (<div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                       <MessageSquare size={11}/>
                       <span>{t('dashboard.assignments.submissions.feedback.label')}</span>
                     </div>
@@ -1571,7 +1571,7 @@ function AssignmentTools(props: {
                     </div>
                   </div>)}
 
-                {!tasks?.length && !feedback && (<p className="text-sm text-gray-400 text-center py-4">
+                {!tasks?.length && !feedback && (<p className="text-sm text-gray-600 text-center py-4">
                     {t('assignments.no_grade_details')}
                   </p>)}
 
@@ -1606,8 +1606,8 @@ function AssignmentTools(props: {
                             </button>} functionToExecute={retrySubmissionUI} status="warning"/>
                       </div>) : (<div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
                         <div className="flex items-center gap-2">
-                          <RotateCcw size={14} className="text-gray-400 shrink-0"/>
-                          <p className="text-xs text-gray-500 font-medium">
+                          <RotateCcw size={14} className="text-gray-600 shrink-0"/>
+                          <p className="text-xs text-gray-600 font-medium">
                             {t('assignments.retry_no_attempts_left')} ·{' '}
                             {t('assignments.attempt_count_bounded', {
                             current: currentAttempt,

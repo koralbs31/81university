@@ -90,14 +90,14 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 <div className='flex items-baseline justify-between gap-2'>
                     <h2 className='text-base font-semibold text-neutral-900'>
                         {t('dashboard.assignments.editor.tasks_title')}
-                        {tasks.length > 0 && (<span className='ms-2 text-sm font-medium text-neutral-400 tabular-nums'>{tasks.length}/{MAX_TASKS}</span>)}
+                        {tasks.length > 0 && (<span className='ms-2 text-sm font-medium text-neutral-600 tabular-nums'>{tasks.length}/{MAX_TASKS}</span>)}
                     </h2>
-                    {totalPoints > 0 && (<span className='text-xs text-neutral-500 tabular-nums'>
+                    {totalPoints > 0 && (<span className='text-xs text-neutral-600 tabular-nums'>
                             {t('dashboard.assignments.editor.total_points', { points: totalPoints })}
                         </span>)}
                 </div>
                 {assignments && tasks.length < MAX_TASKS && (<TaskCreateActions assignment_uuid={assignment_uuid}/>)}
-                {assignments && tasks.length >= MAX_TASKS && (<p className='text-xs text-neutral-500'>{t('dashboard.assignments.editor.max_tasks_reached', { max: MAX_TASKS })}</p>)}
+                {assignments && tasks.length >= MAX_TASKS && (<p className='text-xs text-neutral-600'>{t('dashboard.assignments.editor.max_tasks_reached', { max: MAX_TASKS })}</p>)}
             </div>
 
             {/* Task rows */}
@@ -119,19 +119,19 @@ function AssignmentTasks({ assignment_uuid }: any) {
                                 ${snapshot.isDragging ? 'bg-white nice-shadow' : ''}
                             `}>
                             <span className={`relative w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors
-                                    ${isSelected ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500 ring-1 ring-inset ring-neutral-200'}
+                                    ${isSelected ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-600 ring-1 ring-inset ring-neutral-200'}
                                 `}>
                                 <Icon size={16}/>
                             </span>
                             <span className='min-w-0 flex-1'>
                                 <span className={`block text-sm leading-snug truncate ${isSelected ? 'font-semibold text-neutral-900' : 'font-medium text-neutral-800'}`}>
-                                    {task.title || <span className='text-neutral-400 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
+                                    {task.title || <span className='text-neutral-600 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
                                 </span>
-                                <span className='mt-0.5 block text-xs text-neutral-500 truncate tabular-nums'>
+                                <span className='mt-0.5 block text-xs text-neutral-600 truncate tabular-nums'>
                                     {index + 1}. {meta.labelKey ? t(meta.labelKey) : meta.label}
                                 </span>
                             </span>
-                            {typeof task.max_grade_value === 'number' && (<span className='shrink-0 text-xs font-medium text-neutral-500 tabular-nums'>
+                            {typeof task.max_grade_value === 'number' && (<span className='shrink-0 text-xs font-medium text-neutral-600 tabular-nums'>
                                     {t('dashboard.assignments.editor.points_short', { points: task.max_grade_value })}
                                 </span>)}
                             {tasks.length > 1 && (<GripVertical size={14} className='shrink-0 -ms-1 text-neutral-300 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity' aria-label={t('dashboard.assignments.editor.drag_to_reorder', 'Drag to reorder')}/>)}
@@ -144,7 +144,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 </Droppable>
                 </DragDropContext>
 
-                {tasks.length === 0 && assignments && (<p className='px-3 py-6 text-center text-sm text-neutral-500'>
+                {tasks.length === 0 && assignments && (<p className='px-3 py-6 text-center text-sm text-neutral-600'>
                         {t('dashboard.assignments.editor.no_tasks')}
                     </p>)}
             </div>

@@ -205,7 +205,7 @@ function Courses(props: CourseProps) {
               {usergroupsAvailable && usergroups.length > 0 && (
                 <div className="relative flex items-center gap-1.5">
                   <div className="relative">
-                    <Users className="absolute start-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                    <Users className="absolute start-2.5 top-1/2 transform -translate-y-1/2 text-gray-600 w-4 h-4 pointer-events-none" />
                     <select
                       value={selectedUsergroupId}
                       onChange={(e) => handleUsergroupChange(e.target.value)}
@@ -221,14 +221,14 @@ function Courses(props: CourseProps) {
                   </div>
                   <button
                     onClick={() => setShowUsergroupInfo(!showUsergroupInfo)}
-                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100"
+                    className="p-1.5 text-gray-600 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100"
                   >
                     <Info className="w-3.5 h-3.5" />
                   </button>
                   {showUsergroupInfo && (
                     <div className="absolute top-full start-0 mt-2 z-50 w-72 bg-white nice-shadow rounded-lg p-3 border border-gray-100">
                       <p className="text-xs font-semibold text-gray-700 mb-1">{t('courses.usergroup_filter.info_title')}</p>
-                      <p className="text-xs text-gray-500 leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
+                      <p className="text-xs text-gray-600 leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
                     </div>
                   )}
                 </div>
@@ -257,7 +257,7 @@ function Courses(props: CourseProps) {
                     ? t('courses.no_courses')
                     : t('courses.sign_in_to_see_courses', 'Log in to see your courses')}
                 </h1>
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+                <p className="text-md text-gray-600 mb-6 text-center max-w-xs">
                   {!isAuthenticated ? (
                     t(
                       'courses.sign_in_to_see_courses_description',
@@ -313,7 +313,7 @@ function Courses(props: CourseProps) {
 
           {/* Pagination info */}
           {totalPages > 1 && (
-            <div className="mt-2 text-center text-sm text-gray-500">
+            <div className="mt-2 text-center text-sm text-gray-600">
               {t('pagination.showing_page', { current: currentPage, total: totalPages })}
             </div>
           )}

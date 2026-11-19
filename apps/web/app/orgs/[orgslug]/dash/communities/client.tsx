@@ -81,7 +81,7 @@ const CommunitiesDashClient = ({
               <h2 className="text-2xl font-bold text-gray-600 mb-2">
                 {t('dashboard.courses.communities.no_communities')}
               </h2>
-              <p className="text-lg text-gray-400">
+              <p className="text-lg text-gray-600">
                 {t('dashboard.courses.communities.no_communities_description')}
               </p>
               <div className="mt-6 flex justify-center">

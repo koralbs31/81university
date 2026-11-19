@@ -176,7 +176,7 @@ function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
     <div className="w-full max-w-[420px] py-10">
       {/* Header */}
       <h1 className="text-[28px] md:text-[32px] font-black text-black tracking-tight leading-tight">{t('auth.create_account')}</h1>
-      <p className="mt-2 text-black/45 text-[15px] font-medium">{t('auth.fill_in_details')}</p>
+      <p className="mt-2 text-black/65 text-[15px] font-medium">{t('auth.fill_in_details')}</p>
 
       <div className="mt-8">
         {/* Error/Success Messages */}
@@ -405,7 +405,7 @@ function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponentProps = {}) {
               <div className="w-full border-t border-neutral-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 text-black/30 bg-white text-xs font-medium">{t('common.or')}</span>
+              <span className="px-3 text-black/65 bg-white text-xs font-medium">{t('common.or')}</span>
             </div>
           </div>
         )}

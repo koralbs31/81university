@@ -135,11 +135,11 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
             <Award className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
           </div>
           {error ? (
-            <p className="text-gray-500">{t('certificate.failed_load_certificates')}</p>
+            <p className="text-gray-600">{t('certificate.failed_load_certificates')}</p>
           ) : (
             <>
               <h3 className="text-xl font-bold text-gray-600 mb-2">{t('certificate.no_certificates_earned')}</h3>
-              <p className="text-md text-gray-400 text-center max-w-xs">{t('certificate.complete_courses_to_earn')}</p>
+              <p className="text-md text-gray-600 text-center max-w-xs">{t('certificate.complete_courses_to_earn')}</p>
             </>
           )}
         </div>

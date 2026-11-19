@@ -287,13 +287,13 @@ function OrgUsers() {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-4 sm:px-6 py-5 border-b border-gray-100">
               <div className="flex-1 min-w-0">
                 <h1 className="font-bold text-xl text-gray-800">{t('dashboard.users.active_users.title')}</h1>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-gray-600 mt-0.5">
                   {t('dashboard.users.active_users.subtitle')}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {total > 0 && (
-                  <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg font-medium">
+                  <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg font-medium">
                     {t('dashboard.users.active_users.users_count', { count: total, defaultValue: '{{count}} users' })}
                   </div>
                 )}
@@ -302,7 +302,7 @@ function OrgUsers() {
                     report. No amounts here: billing owns the numbers. */}
 
                 <div className="relative">
-                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                   <input
                     placeholder={t('dashboard.users.active_users.search_placeholder') || 'Search users...'}
                     className="ps-10 pe-4 py-2 w-full sm:w-[220px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
@@ -325,12 +325,12 @@ function OrgUsers() {
 
             {/* Filter Bar */}
             <div className="flex flex-wrap items-center gap-2 px-4 sm:px-6 py-3 border-b border-gray-100 bg-gray-50/30">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('dashboard.users.active_users.filters.title')}</span>
+              <Filter className="w-4 h-4 text-gray-600" />
+              <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">{t('dashboard.users.active_users.filters.title')}</span>
 
               {/* Role filter */}
               <Select value={filterRole || 'all'} onValueChange={handleFilterChange(setFilterRole)}>
-                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-white">
+                <SelectTrigger aria-label={filterRole ? roles?.find((role: any) => String(role.id) === filterRole)?.name : t('dashboard.users.active_users.filters.all_roles')} className="h-8 w-[140px] text-xs border-gray-200 bg-white">
                   <SelectValue placeholder={t('dashboard.users.active_users.filters.all_roles')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -345,7 +345,7 @@ function OrgUsers() {
 
               {/* Status filter */}
               <Select value={filterStatus || 'all'} onValueChange={handleFilterChange(setFilterStatus)}>
-                <SelectTrigger className="h-8 w-[140px] text-xs border-gray-200 bg-white">
+                <SelectTrigger aria-label={filterStatus ? t('dashboard.users.analytics.identity.' + filterStatus) : t('dashboard.users.active_users.filters.all_statuses')} className="h-8 w-[140px] text-xs border-gray-200 bg-white">
                   <SelectValue placeholder={t('dashboard.users.active_users.filters.all_statuses')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -357,7 +357,7 @@ function OrgUsers() {
 
               {/* Group filter */}
               <Select value={filterGroupId || 'all'} onValueChange={handleFilterChange(setFilterGroupId)}>
-                <SelectTrigger className="h-8 w-[160px] text-xs border-gray-200 bg-white">
+                <SelectTrigger aria-label={filterGroupId ? usergroups?.find((group: any) => String(group.id) === filterGroupId)?.name : t('dashboard.users.active_users.filters.all_groups')} className="h-8 w-[160px] text-xs border-gray-200 bg-white">
                   <SelectValue placeholder={t('dashboard.users.active_users.filters.all_groups')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -373,7 +373,7 @@ function OrgUsers() {
               {hasActiveFilters && (
                 <button
                   onClick={resetFilters}
-                  className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-medium px-2 py-1 rounded hover:bg-gray-100 transition-all"
+                  className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-gray-700 font-medium px-2 py-1 rounded hover:bg-gray-100 transition-all"
                 >
                   <X className="w-3 h-3" />
                   {t('dashboard.users.active_users.filters.clear_filters')}
@@ -469,9 +469,9 @@ function OrgUsers() {
                 <div className="py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="bg-gray-100 p-4 rounded-full">
-                      <User className="w-8 h-8 text-gray-400" />
+                      <User className="w-8 h-8 text-gray-600" />
                     </div>
-                    <p className="text-gray-400 text-sm font-medium">
+                    <p className="text-gray-600 text-sm font-medium">
                       {searchValue || hasActiveFilters
                         ? t('dashboard.users.active_users.no_results') || 'No users found matching your filters'
                         : t('dashboard.users.active_users.no_users') || 'No users in this organization yet'
@@ -500,19 +500,20 @@ function OrgUsers() {
                       <th className="text-start px-3 sm:px-6 py-3 w-10">
                         <input
                           type="checkbox"
+                          aria-label={t('accessibility.select_all_users')}
                           checked={allVisibleSelected}
                           onChange={toggleSelectAll}
                           className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
                       </th>
-                      <th className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3">
+                      <th className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3">
                         {t('dashboard.users.active_users.table.user') || 'User'}
                       </th>
-                      <th className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3">
+                      <th className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3">
                         {t('dashboard.users.active_users.table.groups') || 'Groups'}
                       </th>
                       <th
-                        className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3 cursor-pointer select-none hover:text-gray-700 transition-colors"
+                        className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3 cursor-pointer select-none hover:text-gray-700 transition-colors"
                         onClick={toggleSortOrder}
                       >
                         <div className="inline-flex items-center gap-1">
@@ -524,22 +525,22 @@ function OrgUsers() {
                           )}
                         </div>
                       </th>
-                      <th className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3">
+                      <th className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3">
                         {t('dashboard.users.active_users.table.status')}
                       </th>
-                      <th className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3">
+                      <th className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3">
                         {t('dashboard.users.active_users.table.role') || 'Role'}
                       </th>
                       {/* One column per custom signup field the org collects. */}
                       {customFields.map((field) => (
                         <th
                           key={field.key}
-                          className="text-start text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3 whitespace-nowrap"
+                          className="text-start text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3 whitespace-nowrap"
                         >
                           {field.label || field.key}
                         </th>
                       ))}
-                      <th className="text-end text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 sm:px-6 py-3">
+                      <th className="text-end text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 sm:px-6 py-3">
                         {t('dashboard.users.active_users.table.actions') || 'Actions'}
                       </th>
                     </tr>
@@ -554,6 +555,7 @@ function OrgUsers() {
                         <td className="px-3 sm:px-3 sm:px-6 py-3 sm:py-4 w-10">
                           <input
                             type="checkbox"
+                          aria-label={t('accessibility.select_user', { name: user.user.username || user.user.email })}
                             checked={selectedUserIds.has(user.user.id)}
                             onChange={() => toggleSelectUser(user.user.id)}
                             className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
@@ -576,12 +578,12 @@ function OrgUsers() {
                                 <span className="font-semibold text-gray-800 text-sm truncate">
                                   {user.user.first_name + ' ' + user.user.last_name}
                                 </span>
-                                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-500 font-medium">
+                                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600 font-medium">
                                   @{user.user.username}
                                 </span>
                               </div>
                               {user.user.email && (
-                                <span className="text-xs text-gray-400 truncate">
+                                <span className="text-xs text-gray-600 truncate">
                                   {user.user.email}
                                 </span>
                               )}
@@ -605,13 +607,13 @@ function OrgUsers() {
                               ))}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">{t('dashboard.users.active_users.table.not_available')}</span>
+                            <span className="text-xs text-gray-600">{t('dashboard.users.active_users.table.not_available')}</span>
                           )}
                         </td>
 
                         {/* Joined */}
                         <td className="px-3 sm:px-3 sm:px-6 py-3 sm:py-4">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-600">
                             {formatShortDate(user.joined_at, i18n.language)}
                           </span>
                         </td>
@@ -621,12 +623,12 @@ function OrgUsers() {
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               {user.user.email_verified ? (
-                                <span className="inline-flex items-center gap-1 text-xs text-emerald-600" title={t('dashboard.users.active_users.table.email_verified')}>
+                                <span className="inline-flex items-center gap-1 text-xs text-emerald-700" title={t('dashboard.users.active_users.table.email_verified')}>
                                   <CheckCircle2 className="w-3.5 h-3.5" />
                                   <span>{t('dashboard.users.analytics.identity.verified')}</span>
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-xs text-amber-600" title={t('dashboard.users.active_users.table.email_not_verified')}>
+                                <span className="inline-flex items-center gap-1 text-xs text-amber-700" title={t('dashboard.users.active_users.table.email_not_verified')}>
                                   <XCircle className="w-3.5 h-3.5" />
                                   <span>{t('dashboard.users.analytics.identity.unverified')}</span>
                                 </span>
@@ -647,7 +649,7 @@ function OrgUsers() {
                               )}
                             </div>
                             {user.user.last_login_at && (
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-gray-600">
                                 {t('dashboard.users.active_users.table.last_login', { date: formatShortDate(user.user.last_login_at, i18n.language) })}
                               </span>
                             )}
@@ -655,8 +657,8 @@ function OrgUsers() {
                               <span
                                 className={`inline-flex items-center gap-1 w-fit text-xs px-1.5 py-0.5 rounded font-medium ${
                                   user.is_active
-                                    ? 'bg-emerald-50 text-emerald-600'
-                                    : 'bg-gray-100 text-gray-500'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'bg-gray-100 text-gray-600'
                                 }`}
                                 title={t(user.is_active ? 'dashboard.users.active_users.table.visit_days_tooltip_active' : 'dashboard.users.active_users.table.visit_days_tooltip', { count: user.visit_days })}
                               >
@@ -673,7 +675,7 @@ function OrgUsers() {
                             onValueChange={(newRoleUuid) => handleRoleChange(user.user.id, newRoleUuid)}
                             disabled={!roles || !canManageOrg || user.user.id === session?.data?.user?.id}
                           >
-                            <SelectTrigger className={`h-8 w-fit px-3 text-xs font-semibold rounded-md nice-shadow transition-all border-0 ${
+                            <SelectTrigger aria-label={t(`roles.role_${user.role.name.toLowerCase()}`, { defaultValue: user.role.name })} className={`h-8 w-fit px-3 text-xs font-semibold rounded-md nice-shadow transition-all border-0 ${
                               user.role.name.toLowerCase().includes('admin')
                                 ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
                                 : user.role.name.toLowerCase().includes('teacher') || user.role.name.toLowerCase().includes('instructor')
@@ -700,9 +702,9 @@ function OrgUsers() {
                                     {role.name.toLowerCase().includes('admin') ? (
                                       <Crown className="w-3.5 h-3.5 text-indigo-600" />
                                     ) : role.name.toLowerCase().includes('teacher') || role.name.toLowerCase().includes('instructor') ? (
-                                      <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                                      <Shield className="w-3.5 h-3.5 text-emerald-700" />
                                     ) : (
-                                      <User className="w-3.5 h-3.5 text-gray-500" />
+                                      <User className="w-3.5 h-3.5 text-gray-600" />
                                     )}
                                     <span>{t(`roles.role_${role.name.toLowerCase()}`, { defaultValue: role.name })}</span>
                                   </div>
@@ -741,7 +743,7 @@ function OrgUsers() {
                                 <ToolTip content={t('dashboard.users.analytics.open_full_page')} side="top">
                                   <Link
                                     href={getUriWithOrg(params.orgslug, '') + `/dash/users/analytics/${user.user.id}`}
-                                    className="inline-flex items-center justify-center h-8 w-8 bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-md nice-shadow transition-all"
+                                    className="inline-flex items-center justify-center h-8 w-8 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-700 rounded-md nice-shadow transition-all"
                                   >
                                     <ExternalLink className="w-3.5 h-3.5" />
                                   </Link>
@@ -781,7 +783,7 @@ function OrgUsers() {
             {/* Pagination Controls */}
             {total > ITEMS_PER_PAGE && (
               <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-                <div className="text-xs text-gray-500 font-medium">
+                <div className="text-xs text-gray-600 font-medium">
                   {t('dashboard.users.active_users.pagination.showing', {
                     start: (page - 1) * ITEMS_PER_PAGE + 1,
                     end: Math.min(page * ITEMS_PER_PAGE, total),

@@ -129,7 +129,7 @@ export function DashTabBar({ tabs }: DashTabBarProps) {
           }
 
           const tabClass = `py-2 w-fit text-center border-black transition-all ease-linear cursor-pointer ${
-            tab.active ? 'border-b-4' : 'opacity-50 hover:opacity-75'
+            tab.active ? 'border-b-4' : 'opacity-75 hover:opacity-100'
           }`
 
           if (tab.href) {

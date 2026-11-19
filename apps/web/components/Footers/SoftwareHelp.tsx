@@ -28,6 +28,7 @@ export default function SoftwareHelp() {
           <DropdownMenuItem asChild>
             <a href="/software-notices" className="flex items-center gap-2"><Book size={16} weight="fill" /><span>AGPL-3.0</span></a>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild><a href="/accessibility" className="flex items-center gap-2"><Book size={16} weight="fill" /><span>{t('accessibility.statement')}</span></a></DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="flex items-center gap-2" onClick={() => { setFeedbackMounted(true); setFeedbackOpen(true) }}>
             <ChatCircleDots size={16} weight="fill" /><span>{t('common.help_menu.report_feedback')}</span>

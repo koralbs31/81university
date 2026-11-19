@@ -2625,3 +2625,13 @@
     display: none;
   }
 }
+
+/* Keyboard focus must remain visible even on controls that reset outlines. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse, .animate-fade-in { animation: none !important; }
+  html { scroll-behavior: auto; }
+}

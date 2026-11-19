@@ -72,7 +72,7 @@ export default function NewAssignmentModal({
       {step === 'course' && (
         <>
           <StepHint
-            icon={<BookOpen size={15} className="text-gray-400" />}
+            icon={<BookOpen size={15} className="text-gray-600" />}
             text={t('dashboard.assignments.create_flow.pick_course', {
               defaultValue: 'Choose the course this assignment belongs to.',
             })}
@@ -124,7 +124,7 @@ export default function NewAssignmentModal({
         <>
           <BackRow onClick={() => setStep('course')} label={courseDetail?.name} />
           <StepHint
-            icon={<Layers size={15} className="text-gray-400" />}
+            icon={<Layers size={15} className="text-gray-600" />}
             text={t('dashboard.assignments.create_flow.pick_chapter', {
               defaultValue: 'Choose the chapter to place this assignment in.',
             })}
@@ -207,7 +207,7 @@ export default function NewAssignmentModal({
 
 function StepHint({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-500">
+    <div className="flex items-center gap-2 text-sm text-gray-600">
       {icon}
       <span>{text}</span>
     </div>
@@ -219,7 +219,7 @@ function BackRow({ onClick, label }: { onClick: () => void; label?: string }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+      className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-gray-800 transition-colors"
     >
       <ArrowLeft size={14} />
       <span className="truncate max-w-[220px]">{label || t('common.back')}</span>
@@ -244,9 +244,9 @@ function EmptyCta({
 }) {
   return (
     <div className="flex flex-col items-center text-center py-8 px-4 gap-3">
-      <div className="bg-gray-100 text-gray-400 rounded-2xl p-4">{icon}</div>
+      <div className="bg-gray-100 text-gray-600 rounded-2xl p-4">{icon}</div>
       <p className="font-bold text-gray-800">{title}</p>
-      <p className="text-sm text-gray-500 max-w-sm">{desc}</p>
+      <p className="text-sm text-gray-600 max-w-sm">{desc}</p>
       <Link
         href={href}
         onClick={onNavigate}

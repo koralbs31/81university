@@ -301,12 +301,12 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
     if (isEmpty) {
         return (
             <div className="flex flex-col w-full min-w-0 lg:h-full">
-                <div className="flex flex-col items-center justify-center h-full py-16 px-6 text-gray-400 gap-3">
+                <div className="flex flex-col items-center justify-center h-full py-16 px-6 text-gray-600 gap-3">
                     <div className="bg-gray-100 rounded-2xl p-4">
                         <BarChart3 size={28} />
                     </div>
                     <p className="text-sm font-semibold">{t('dashboard.assignments.analytics.empty.title')}</p>
-                    <p className="text-xs text-gray-400 max-w-sm text-center">{t('dashboard.assignments.analytics.empty.description')}</p>
+                    <p className="text-xs text-gray-600 max-w-sm text-center">{t('dashboard.assignments.analytics.empty.description')}</p>
                 </div>
             </div>
         );
@@ -535,10 +535,10 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                                     </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 pt-2 text-[10px] text-gray-400 font-medium">
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 px-3 pt-2 text-[10px] text-gray-600 font-medium">
                                 {taskPerformance.map((task) => (
                                     <div key={task.uuid} className="flex items-center space-x-1">
-                                        <span className="font-bold text-gray-500">{task.label}</span>
+                                        <span className="font-bold text-gray-600">{task.label}</span>
                                         <span className="truncate max-w-[220px]">{task.title}</span>
                                         <span className="text-gray-300">·</span>
                                         <span>{task.attempts} {t('dashboard.assignments.analytics.tasks.attempts')}</span>
@@ -579,7 +579,7 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                         subtitle={t('dashboard.assignments.analytics.attention.subtitle')}
                     >
                         {strugglingStudents.length === 0 ? (
-                            <div className="flex items-center justify-center h-40 text-xs text-gray-400 font-medium flex-col gap-2">
+                            <div className="flex items-center justify-center h-40 text-xs text-gray-600 font-medium flex-col gap-2">
                                 <CheckCircle2 size={20} className="text-emerald-400" />
                                 <span>{t('dashboard.assignments.analytics.attention.empty')}</span>
                             </div>
@@ -628,9 +628,9 @@ function KpiCard({
                 )}
             </div>
             <div>
-                <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{label}</p>
+                <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-600">{label}</p>
                 <p className="text-2xl font-bold text-gray-900 leading-tight">{value}</p>
-                {sub && <p className="text-[11px] text-gray-400 font-medium -mt-0.5">{sub}</p>}
+                {sub && <p className="text-[11px] text-gray-600 font-medium -mt-0.5">{sub}</p>}
             </div>
         </div>
     );
@@ -661,7 +661,7 @@ function MiniStat({
                 {icon}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 truncate">{label}</p>
+                <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-600 truncate">{label}</p>
                 <p className="text-sm font-bold text-gray-900 -mt-0.5 truncate">{value}</p>
             </div>
         </div>
@@ -686,7 +686,7 @@ function ChartCard({
                     <div className="bg-gray-100 rounded-md p-1.5 text-gray-600">{icon}</div>
                     <div className="flex flex-col">
                         <h3 className="text-sm font-bold text-gray-800 leading-tight">{title}</h3>
-                        {subtitle && <p className="text-[11px] text-gray-400 font-medium">{subtitle}</p>}
+                        {subtitle && <p className="text-[11px] text-gray-600 font-medium">{subtitle}</p>}
                     </div>
                 </div>
             </div>
@@ -697,7 +697,7 @@ function ChartCard({
 
 function EmptyChart({ message }: { message: string }) {
     return (
-        <div className="flex items-center justify-center h-40 text-xs text-gray-400 font-medium">
+        <div className="flex items-center justify-center h-40 text-xs text-gray-600 font-medium">
             {message}
         </div>
     );
@@ -742,13 +742,13 @@ function PerformerRow({
             />
             <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
-                {user?.email && <p className="text-[11px] text-gray-400 truncate">{user.email}</p>}
+                {user?.email && <p className="text-[11px] text-gray-600 truncate">{user.email}</p>}
             </div>
             <div className="flex flex-col items-end">
                 <span className={`text-sm font-bold ${passed ? 'text-emerald-700' : 'text-rose-700'}`}>
                     {gradeText}
                 </span>
-                {points && <span className="text-[10px] text-gray-400 font-medium">{points}</span>}
+                {points && <span className="text-[10px] text-gray-600 font-medium">{points}</span>}
             </div>
         </div>
     );
@@ -760,7 +760,7 @@ function RankBadge({ rank }: { rank: number }) {
         2: { bg: 'bg-slate-100', text: 'text-slate-600', icon: <Medal size={11} /> },
         3: { bg: 'bg-orange-100', text: 'text-orange-700', icon: <Medal size={11} /> },
     };
-    const style = palette[rank] || { bg: 'bg-gray-100', text: 'text-gray-500' };
+    const style = palette[rank] || { bg: 'bg-gray-100', text: 'text-gray-600' };
     return (
         <div className={`${style.bg} ${style.text} w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0`}>
             {style.icon ? style.icon : `#${rank}`}

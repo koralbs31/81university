@@ -72,7 +72,7 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
               <h1 className="text-xl font-bold text-gray-600 mb-2">
                 {t('communities.no_communities')}
               </h1>
-              <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+              <p className="text-md text-gray-600 mb-6 text-center max-w-xs">
                 <ContentPlaceHolderIfUserIsNotAdmin
                   text={t('communities.no_communities_description')}
                 />

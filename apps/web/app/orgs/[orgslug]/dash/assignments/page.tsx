@@ -172,7 +172,7 @@ function AssignmentsHome() {
           <div className='flex flex-wrap items-end justify-between gap-x-4 gap-y-3'>
             <div className='min-w-0'>
               <h1 className='text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900'>{t('dashboard.assignments.home.title')}</h1>
-              <p className='mt-1 text-sm text-neutral-500'>
+              <p className='mt-1 text-sm text-neutral-600'>
                 {t('dashboard.assignments.home.subtitle')}
               </p>
             </div>
@@ -214,18 +214,18 @@ function AssignmentsHome() {
         {/* Toolbar */}
         <div className='flex flex-col xl:flex-row gap-3 xl:items-center'>
           <div className='relative flex-1 min-w-0 xl:max-w-md'>
-            <Search size={16} className='absolute start-3.5 top-1/2 -translate-y-1/2 text-neutral-400' />
+            <Search size={16} className='absolute start-3.5 top-1/2 -translate-y-1/2 text-neutral-600' />
             <input
               type='text'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('dashboard.assignments.home.search_placeholder')}
-              className='w-full h-10 ps-10 pe-9 text-sm bg-white nice-shadow rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/10 placeholder:text-neutral-400'
+              className='w-full h-10 ps-10 pe-9 text-sm bg-white nice-shadow rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/10 placeholder:text-neutral-600'
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className='absolute end-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600'
+                className='absolute end-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-600'
                 aria-label={t('dashboard.assignments.home.clear_search')}
               >
                 <X size={14} />
@@ -243,7 +243,7 @@ function AssignmentsHome() {
                   aria-selected={statusFilter === opt.key}
                   onClick={() => setStatusFilter(opt.key)}
                   className={`h-8 px-3 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
-                    statusFilter === opt.key ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-800'
+                    statusFilter === opt.key ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-800'
                   }`}
                 >
                   {opt.label}
@@ -277,7 +277,7 @@ function AssignmentsHome() {
                     <option key={c.course_uuid} value={c.course_uuid}>{c.name}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className='pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-neutral-400' />
+                <ChevronDown size={14} className='pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-neutral-600' />
               </div>
             )}
           </div>
@@ -286,7 +286,7 @@ function AssignmentsHome() {
         {/* List */}
         <div className={`bg-white rounded-2xl nice-shadow overflow-hidden ${TABLE_GRID}`}>
           {/* Column labels (desktop) */}
-          <div className={`hidden ${ROW_GRID} px-5 py-3 border-b border-neutral-100 text-xs font-medium text-neutral-500`}>
+          <div className={`hidden ${ROW_GRID} px-5 py-3 border-b border-neutral-100 text-xs font-medium text-neutral-600`}>
             <span>{t('dashboard.assignments.home.assignment_label')}</span>
             <span>{t('dashboard.assignments.home.course_label')}</span>
             <span>{t('dashboard.assignments.home.columns.grading')}</span>
@@ -312,7 +312,7 @@ function AssignmentsHome() {
 
           {courseAssignments && filteredRows.length === 0 && (
             <div className='flex flex-col items-center justify-center text-center py-16 px-6 gap-3 xl:col-span-full'>
-              <div className='w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center'>
+              <div className='w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-600 flex items-center justify-center'>
                 <Inbox size={22} />
               </div>
               <div>
@@ -322,7 +322,7 @@ function AssignmentsHome() {
                     : t('dashboard.assignments.home.empty')}
                 </p>
                 {!hasActiveFilters && (
-                  <p className='mt-1 text-sm text-neutral-500 max-w-sm'>{t('dashboard.assignments.home.empty_description')}</p>
+                  <p className='mt-1 text-sm text-neutral-600 max-w-sm'>{t('dashboard.assignments.home.empty_description')}</p>
                 )}
               </div>
               {hasActiveFilters ? (
@@ -352,7 +352,7 @@ function AssignmentsHome() {
           )}
 
           {courseAssignments && filteredRows.length > 0 && (
-            <div className='px-5 py-3 border-t border-neutral-100 text-xs text-neutral-500 tabular-nums xl:col-span-full'>
+            <div className='px-5 py-3 border-t border-neutral-100 text-xs text-neutral-600 tabular-nums xl:col-span-full'>
               {t('dashboard.assignments.home.showing_count', {
                 shown: filteredRows.length,
                 total: stats.total,
@@ -390,7 +390,7 @@ function StatCard({
     <div className='flex items-center gap-3 bg-white nice-shadow rounded-2xl px-4 py-3.5 min-w-0'>
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>{icon}</div>
       <div className='min-w-0'>
-        <p className='text-xs text-neutral-500 truncate'>{label}</p>
+        <p className='text-xs text-neutral-600 truncate'>{label}</p>
         {value === null ? (
           <div className='mt-1 h-5 w-8 rounded bg-neutral-100 animate-pulse' />
         ) : (
@@ -453,10 +453,10 @@ function AssignmentRow({
             <span className='xl:hidden shrink-0'>{statusChip}</span>
           </div>
           {assignment.description && (
-            <p className='mt-0.5 text-xs text-neutral-500 line-clamp-1 break-words'>{assignment.description}</p>
+            <p className='mt-0.5 text-xs text-neutral-600 line-clamp-1 break-words'>{assignment.description}</p>
           )}
           {/* Compact meta line (below lg the columns collapse into this) */}
-          <div className='xl:hidden mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500'>
+          <div className='xl:hidden mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600'>
             <span className='inline-flex items-center gap-1 min-w-0 max-w-full'>
               <Layers2 size={12} className='shrink-0' />
               <span className='truncate'>{course.name}</span>
@@ -499,7 +499,7 @@ function AssignmentRow({
       <div className='hidden xl:flex items-center gap-1.5 min-w-0 text-sm text-neutral-700'>
         {grading && GradingIcon && (
           <span className='inline-flex items-center gap-1.5 min-w-0'>
-            <GradingIcon size={14} className='text-neutral-400 shrink-0' />
+            <GradingIcon size={14} className='text-neutral-600 shrink-0' />
             <span className='truncate'>{t(grading.labelKey)}</span>
           </span>
         )}
@@ -516,7 +516,7 @@ function AssignmentRow({
       </div>
 
       {/* Due date */}
-      <div className={`hidden xl:block text-sm tabular-nums ${dueDate ? (isPastDue ? 'text-rose-600' : 'text-neutral-700') : 'text-neutral-400'}`}>
+      <div className={`hidden xl:block text-sm tabular-nums ${dueDate ? (isPastDue ? 'text-rose-600' : 'text-neutral-700') : 'text-neutral-600'}`}>
         {dueDate ?? t('dashboard.assignments.home.no_due_date')}
       </div>
 

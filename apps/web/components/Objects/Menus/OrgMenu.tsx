@@ -305,6 +305,7 @@ export const OrgMenu = (props: any) => {
                   <DropdownMenuItem asChild>
                     <a href="/software-notices" className="flex items-center gap-2"><Book size={16} weight="fill" /><span>AGPL-3.0</span></a>
                   </DropdownMenuItem>
+          <DropdownMenuItem asChild><a href="/accessibility" className="flex items-center gap-2"><Book size={16} weight="fill" /><span>{t('accessibility.statement')}</span></a></DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {

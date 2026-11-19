@@ -36,17 +36,17 @@ export default function PathsClient({ orgslug, org_id }: { orgslug: string; org_
             <AuthenticatedClientElement checkMethod="roles" action="create" ressourceType="courses" orgId={org_id}>
               <Link
                 href={getUriWithOrg(orgslug, '/dash/paths')}
-                className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors"
+                className="text-xs font-bold text-gray-600 hover:text-gray-900 transition-colors"
               >
                 {t('paths.manage_paths')} &rarr;
               </Link>
             </AuthenticatedClientElement>
           </div>
-          <p className="text-sm text-gray-500 -mt-2 mb-4 max-w-2xl">{t('paths.catalog_subtitle')}</p>
+          <p className="text-sm text-gray-600 -mt-2 mb-4 max-w-2xl">{t('paths.catalog_subtitle')}</p>
 
           {paths.length > 0 && (
             <div className="relative w-full sm:w-80 mb-6">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-600 w-4 h-4" />
               <input
                 type="text"
                 value={searchQuery}
@@ -59,7 +59,7 @@ export default function PathsClient({ orgslug, org_id }: { orgslug: string; org_
                 <button
                   onClick={() => setSearchQuery('')}
                   aria-label={t('paths.clear_search')}
-                  className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-600"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -69,7 +69,7 @@ export default function PathsClient({ orgslug, org_id }: { orgslug: string; org_
 
           {following.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">{t('paths.continue_learning')}</h2>
+              <h2 className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-3">{t('paths.continue_learning')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {following.map((path) => (
                   <PathThumbnail key={path.path_uuid} path={path} orgslug={orgslug} />
@@ -98,7 +98,7 @@ export default function PathsClient({ orgslug, org_id }: { orgslug: string; org_
                   <Route className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
                 </div>
                 <h1 className="text-xl font-bold text-gray-600 mb-2">{t('paths.no_public_paths')}</h1>
-                <p className="text-md text-gray-400 text-center max-w-xs">{t('paths.no_public_paths_description')}</p>
+                <p className="text-md text-gray-600 text-center max-w-xs">{t('paths.no_public_paths_description')}</p>
               </div>
             )}
             {!isLoading && paths.length > 0 && filtered.length === 0 && (

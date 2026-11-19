@@ -65,25 +65,25 @@ function getActivityTypeBadgeColor(activityType: string): string {
 
 // Memoized activity type icon component
 const ActivityTypeIcon = memo(({ activityType, activitySubType }: { activityType: string; activitySubType?: string }) => {
-  if (activitySubType === 'SUBTYPE_DYNAMIC_MARKDOWN') return <MarkdownLogo size={16} className="text-gray-400" />
-  if (activitySubType === 'SUBTYPE_DYNAMIC_EMBED') return <Globe size={16} className="text-gray-400" />
+  if (activitySubType === 'SUBTYPE_DYNAMIC_MARKDOWN') return <MarkdownLogo size={16} className="text-gray-600" />
+  if (activitySubType === 'SUBTYPE_DYNAMIC_EMBED') return <Globe size={16} className="text-gray-600" />
   switch (activityType) {
     case 'TYPE_VIDEO':
-      return <Video size={16} className="text-gray-400" />
+      return <Video size={16} className="text-gray-600" />
     case 'TYPE_DOCUMENT':
-      return <FileText size={16} className="text-gray-400" />
+      return <FileText size={16} className="text-gray-600" />
     case 'TYPE_DYNAMIC':
-      return <Layers size={16} className="text-gray-400" />
+      return <Layers size={16} className="text-gray-600" />
     case 'TYPE_ASSIGNMENT':
-      return <BookOpenCheck size={16} className="text-gray-400" />
+      return <BookOpenCheck size={16} className="text-gray-600" />
     case 'TYPE_SCORM':
-      return <Package size={16} className="text-gray-400" />
+      return <Package size={16} className="text-gray-600" />
     case 'TYPE_LIVE_SESSION':
-      return <Radio size={16} className="text-gray-400" />
+      return <Radio size={16} className="text-gray-600" />
     case 'TYPE_CUSTOM':
-      return <Puzzle size={16} className="text-gray-400" />
+      return <Puzzle size={16} className="text-gray-600" />
     default:
-      return <FileText size={16} className="text-gray-400" />
+      return <FileText size={16} className="text-gray-600" />
   }
 });
 
@@ -106,7 +106,7 @@ const ActivityTooltipContent = memo(({
       <ActivityTypeIcon activityType={activity.activity_type} activitySubType={activity.activity_sub_type} />
       <span className="text-sm text-gray-700">{activity.name}</span>
       {isDone && (
-        <span className="ms-auto text-gray-400">
+        <span className="ms-auto text-gray-600">
           <Check size={14} />
         </span>
       )}
@@ -115,7 +115,7 @@ const ActivityTooltipContent = memo(({
       <span className={`text-xs px-2 py-0.5 rounded-full ${getActivityTypeBadgeColor(activity.activity_type)}`}>
         {getActivityTypeLabel(activity.activity_type, t, activity.activity_sub_type)}
       </span>
-      <span className="text-xs text-gray-400">
+      <span className="text-xs text-gray-600">
         {isCurrent ? t('activities.current_activity') : isDone ? t('common.completed') : t('activities.not_started')}
       </span>
     </div>
@@ -199,7 +199,7 @@ const CertificationBadge = memo(({
       <div className={`w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] rounded-full flex items-center justify-center text-xs font-medium transition-all border-2 border-white ${
         isCompleted
           ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-          : 'bg-gray-200 text-gray-400'
+          : 'bg-gray-200 text-gray-600'
       }`}>
         <Trophy size={10} />
       </div>
@@ -247,7 +247,7 @@ const MobileChapterSelector = memo(({
     <div ref={dropdownRef} className="relative">
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center gap-0.5 text-[10px] text-gray-500 font-medium hover:text-gray-700 transition-colors"
+        className="flex items-center gap-0.5 text-[10px] text-gray-600 font-medium hover:text-gray-700 transition-colors"
       >
         <span>{t('courses.chapter')} {currentChapterIndex + 1}/{chapters.length}</span>
         <ChevronDown size={10} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -264,7 +264,7 @@ const MobileChapterSelector = memo(({
 
             return (
               <div key={chapter.id}>
-                <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-teal-600' : 'text-gray-400'}`}>
+                <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-teal-600' : 'text-gray-600'}`}>
                   {t('courses.chapter')} {chapterIdx + 1}: {completedInChapter}/{chapter.activities.length}
                 </div>
                 {chapter.activities.map((activity: any) => {
@@ -449,12 +449,12 @@ function ActivityIndicators(props: Props) {
             className="p-1.5 rounded-full bg-gray-50 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             aria-label={t('activities.previous_activity')}
           >
-            <ChevronLeft size={16} className="text-gray-500" />
+            <ChevronLeft size={16} className="text-gray-600" />
           </button>
         )}
 
         <div className="flex-1 flex flex-col gap-1.5 min-w-0 relative">
-          <div className="flex items-center justify-between text-[10px] text-gray-500 font-medium px-0.5">
+          <div className="flex items-center justify-between text-[10px] text-gray-600 font-medium px-0.5">
             <MobileChapterSelector
               chapters={course.chapters}
               currentChapterIndex={currentChapterIndex}
@@ -489,7 +489,7 @@ function ActivityIndicators(props: Props) {
             className="p-1.5 rounded-full bg-gray-50 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             aria-label={t('activities.next_activity')}
           >
-            <ChevronRight size={16} className="text-gray-500" />
+            <ChevronRight size={16} className="text-gray-600" />
           </button>
         )}
       </div>
@@ -538,7 +538,7 @@ function ActivityIndicators(props: Props) {
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
                           ? 'bg-teal-500 text-white'
-                          : 'bg-gray-200 text-gray-500'
+                          : 'bg-gray-200 text-gray-600'
                       }`}>
                         {chapterIndex + 1}
                       </div>
@@ -548,7 +548,7 @@ function ActivityIndicators(props: Props) {
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
                           ? 'bg-teal-500 text-white'
-                          : 'bg-gray-200 text-gray-500'
+                          : 'bg-gray-200 text-gray-600'
                       }`}>
                         {chapterIndex + 1}
                       </div>
@@ -577,6 +577,8 @@ function ActivityIndicators(props: Props) {
                       >
                         <Link
                           prefetch={false}
+                          aria-label={activity.name}
+                          aria-current={isCurrent ? 'page' : undefined}
                           href={
                             getUriWithOrg(orgslug, '') +
                             `/course/${courseid}/activity/${activity.activity_uuid.replace(

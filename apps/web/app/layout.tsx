@@ -4,6 +4,7 @@ import React from 'react'
 import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import SoftwareHelp from '@components/Footers/SoftwareHelp'
+import SkipToContent from '@components/Accessibility/SkipToContent'
 import localFont from 'next/font/local'
 
 const wixMadeforText = localFont({
@@ -89,7 +90,8 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <Providers>
-          <main className="animate-fade-in">
+          <SkipToContent />
+          <main id="main-content" tabIndex={-1} className="animate-fade-in">
             {children}
           </main>
           <SoftwareHelp />

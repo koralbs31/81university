@@ -62,7 +62,7 @@ function CommunityCard(props: PropsType) {
 
       <Link
         href={communityLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        aria-label={props.community.name} className="block relative aspect-video overflow-hidden bg-gray-50"
       >
         {props.community.thumbnail_image && org?.org_uuid ? (
           <ThumbnailImage
@@ -90,13 +90,13 @@ function CommunityCard(props: PropsType) {
         </Link>
 
         {props.community.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-[11px] text-gray-600 line-clamp-2 min-h-[1.5rem]">
             {props.community.description}
           </p>
         )}
 
         <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-gray-500">
+          <div className="flex items-center gap-1.5 text-gray-600">
             <MessageCircle size={12} />
             <span className="text-[10px] font-bold uppercase tracking-wider">
               {props.community.public ? t('courses.public') : t('courses.private')}
@@ -106,14 +106,14 @@ function CommunityCard(props: PropsType) {
           {variant === 'dashboard' ? (
             <Link
               href={getUriWithOrg(props.orgslug, `/dash/communities/${communityId}/general`)}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-[10px] font-bold text-gray-600 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.open_settings')}
             </Link>
           ) : (
             <Link
               href={communityLink}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-[10px] font-bold text-gray-600 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.view_community')}
             </Link>

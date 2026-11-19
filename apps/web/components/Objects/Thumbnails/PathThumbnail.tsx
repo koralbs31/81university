@@ -63,7 +63,7 @@ function PathThumbnail({ path, orgslug, isDashboard = false }: PropsType) {
         <AdminEditOptions path={path} orgslug={orgslug} onDelete={handleDelete} />
       )}
 
-      <Link prefetch href={pathLink} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <Link prefetch href={pathLink} aria-label={path.name} className="block relative aspect-video overflow-hidden bg-gray-50">
         <ThumbnailImage
           src={thumbnailImage}
           className="w-full h-full transition-transform duration-500 group-hover:scale-105"
@@ -114,14 +114,14 @@ function PathThumbnail({ path, orgslug, isDashboard = false }: PropsType) {
         </Link>
 
         {path.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]" dir="auto">
+          <p className="text-[11px] text-gray-600 line-clamp-2 min-h-[1.5rem]" dir="auto">
             {path.description}
           </p>
         )}
 
         {showProgress ? (
           <div className="pt-1.5 border-t border-gray-100 space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-gray-600">
               <span>{t('paths.progress_short', { done: progress!.courses_done, total: progress!.courses_needed })}</span>
               <span className="text-gray-600">{progress!.percent}%</span>
             </div>
@@ -131,18 +131,18 @@ function PathThumbnail({ path, orgslug, isDashboard = false }: PropsType) {
           </div>
         ) : (
           <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+            <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
               {path.level ? t(`paths.levels.${path.level}`) : t('paths.levels.all')}
             </span>
             {isDashboard ? (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-gray-600 uppercase tracking-wider">
                 <Users size={11} />
                 {t('paths.learner_count', { count: path.enrollment_count })}
               </span>
             ) : (
               <Link
                 href={pathLink}
-                className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+                className="text-[10px] font-bold text-gray-600 hover:text-gray-900 transition-colors uppercase tracking-wider"
               >
                 {t('paths.view_path')}
               </Link>

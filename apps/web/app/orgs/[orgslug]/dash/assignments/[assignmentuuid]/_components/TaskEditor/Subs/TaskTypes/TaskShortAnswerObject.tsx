@@ -503,7 +503,7 @@ function TaskShortAnswerObject({
               </label>
               <div className="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md">
                 {studentAnswer || (
-                  <span className="text-gray-400 italic">
+                  <span className="text-gray-600 italic">
                     {t('dashboard.assignments.editor.task_editor.short_answer.no_answer')}
                   </span>
                 )}

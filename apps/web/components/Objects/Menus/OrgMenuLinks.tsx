@@ -97,22 +97,22 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
           // Icons only until xl: with labels, a full menu pushes the search
           // and account controls out of a small laptop's header.
           const content = (
-            <li className={`flex space-x-2 items-center ${colors.text} font-semibold`} title={it.label}>
+            <span className={`flex space-x-2 items-center ${colors.text} font-semibold`} title={it.label}>
               <it.Icon size={20} weight="fill" aria-hidden /> <span className="sr-only xl:not-sr-only">{it.label}</span>
-            </li>
+            </span>
           )
           if (it.external) {
             return (
-              <a key={it.key} href={it.href} target="_blank" rel="noopener noreferrer">{content}</a>
+              <li key={it.key}><a href={it.href} target="_blank" rel="noopener noreferrer">{content}</a></li>
             )
           }
           const link = <Link href={it.href}>{content}</Link>
           return it.shortcut ? (
-            <ShortcutHint key={it.key} label={t('shortcuts.go_to', { page: it.label })} keys={it.shortcut}>
+            <li key={it.key}><ShortcutHint label={t('shortcuts.go_to', { page: it.label })} keys={it.shortcut}>
               {link}
-            </ShortcutHint>
+            </ShortcutHint></li>
           ) : (
-            <React.Fragment key={it.key}>{link}</React.Fragment>
+            <li key={it.key}>{link}</li>
           )
         })}
       </ul>

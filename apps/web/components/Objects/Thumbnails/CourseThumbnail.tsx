@@ -173,7 +173,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
           {isSelected ? (
             <CheckSquare className="w-4 h-4 text-black" />
           ) : (
-            <Square className="w-4 h-4 text-gray-500" />
+            <Square className="w-4 h-4 text-gray-600" />
           )}
         </button>
       )}
@@ -189,6 +189,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
       />
 
       <Link prefetch={false} href={courseLink} onClick={handleCardOpen} className="block relative aspect-video overflow-hidden bg-gray-50">
+        <span className="sr-only">{course.name}</span>
         <ThumbnailImage
           src={thumbnailImage}
           fetchPriority={isPriority ? 'high' : undefined}
@@ -224,7 +225,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         </div>
         
         {course.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-[11px] text-gray-600 line-clamp-2 min-h-[1.5rem]">
             {course.description}
           </p>
         )}
@@ -261,7 +262,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             )}
             
             {course.update_date && (
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+              <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
                 {formatDate(course.update_date, i18n.language, { dateStyle: undefined, month: 'short', day: 'numeric' })}
               </span>
             )}
@@ -271,7 +272,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[10px] font-bold text-gray-600 hover:text-gray-900 transition-colors uppercase tracking-wider"
           >
             {t('courses.start_learning')}
           </Link>

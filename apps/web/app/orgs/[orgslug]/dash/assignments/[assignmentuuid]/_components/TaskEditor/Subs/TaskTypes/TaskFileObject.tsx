@@ -316,7 +316,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                         <Link
                             href={getTaskFileSubmissionDir(org?.org_uuid, assignment.course_object.course_uuid, assignment.activity_object.activity_uuid, assignment.assignment_object.assignment_uuid, assignmentTaskUUID, userSubmissions.fileUUID)}
                             target='_blank'
-                            className='flex flex-col rounded-lg bg-white text-gray-500 shadow-xs hover:shadow-md transition-shadow border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mx-auto'>
+                            className='flex flex-col rounded-lg bg-white text-gray-600 shadow-xs hover:shadow-md transition-shadow border border-gray-100 px-4 sm:px-5 py-4 space-y-1 items-center relative w-full sm:w-auto mx-auto'>
                             <div className='absolute top-0 end-0 transform translate-x-1/2 -translate-y-1/2 bg-emerald-500 rounded-full p-1.5 text-white flex justify-center items-center shadow-xs'>
                                 <Cloud size={14} />
                             </div>
@@ -352,7 +352,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                 </span>
                                 <div className='min-w-0 flex-1'>
                                     <p className='truncate text-sm font-semibold text-neutral-900'>{fileName}</p>
-                                    <p className='flex items-center gap-1 text-xs text-neutral-500'>
+                                    <p className='flex items-center gap-1 text-xs text-neutral-600'>
                                         <Cloud size={12} className='text-teal-600' />
                                         {t('dashboard.assignments.editor.task_editor.file.uploaded', { defaultValue: 'Uploaded' })}
                                     </p>
@@ -365,8 +365,8 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                             </div>
                         ) : access_token && !canStudentSave ? (
                             // Handed in without a file: nothing to drop anything into any more.
-                            <div className='flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-500'>
-                                <span className='flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-white text-neutral-400'>
+                            <div className='flex items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600'>
+                                <span className='flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-white text-neutral-600'>
                                     <File size={18} />
                                 </span>
                                 {t('dashboard.assignments.editor.task_editor.file.no_file', { defaultValue: 'No file submitted' })}
@@ -385,7 +385,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                 }}
                                 className='flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50/60 px-4 py-7 text-center transition-colors enabled:hover:border-teal-400 enabled:hover:bg-teal-50/40 disabled:cursor-not-allowed'
                             >
-                                <span className='flex h-11 w-11 items-center justify-center rounded-full bg-white text-neutral-500 nice-shadow'>
+                                <span className='flex h-11 w-11 items-center justify-center rounded-full bg-white text-neutral-600 nice-shadow'>
                                     {isLoading ? <Loader size={18} className='animate-spin' /> : <UploadCloud size={18} />}
                                 </span>
                                 <span className='text-sm font-semibold text-neutral-900'>
@@ -393,7 +393,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                                         ? t('dashboard.assignments.editor.task_editor.general.loading')
                                         : t('dashboard.assignments.editor.task_editor.file.submit_file')}
                                 </span>
-                                <span className='text-xs text-neutral-500'>{t('dashboard.assignments.editor.task_editor.general.allowed_formats')}</span>
+                                <span className='text-xs text-neutral-600'>{t('dashboard.assignments.editor.task_editor.general.allowed_formats')}</span>
                             </button>
                         )}
 
@@ -408,7 +408,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID, onGr
                             // never be persisted (auto-save is off once
                             // SUBMITTED/GRADED), so the teacher would keep grading
                             // the previous file.
-                            <p className='flex items-center gap-1.5 text-xs font-medium text-neutral-500'>
+                            <p className='flex items-center gap-1.5 text-xs font-medium text-neutral-600'>
                                 <Lock size={13} />
                                 {submissionIsGraded
                                     ? t('dashboard.assignments.editor.task_editor.general.upload_locked_graded', {

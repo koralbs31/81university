@@ -115,7 +115,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       <div className="absolute top-2 end-2 z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+            <button aria-label={t('courses.course_actions', { defaultValue: 'Course actions' })} className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
               <MoreVertical size={18} className="text-gray-700" />
             </button>
           </DropdownMenuTrigger>
@@ -141,7 +141,8 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       {/* Thumbnail */}
       <Link
         href={courseLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+
+        aria-label={props.course.name} className="block relative aspect-video overflow-hidden bg-gray-50"
       >
         {props.course.thumbnail_image && org?.org_uuid ? (
           <ThumbnailImage
@@ -171,16 +172,17 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       <div className="p-3 flex flex-col space-y-1.5">
         <Link
           href={courseLink}
+
           className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
         >
           {course.name}
         </Link>
 
         <div className="flex items-center gap-2 text-sm">
-          <span className={`font-semibold ${course_progress === 100 ? 'text-green-600' : 'text-teal-600'}`}>
+          <span className={`font-semibold ${course_progress === 100 ? 'text-green-700' : 'text-teal-700'}`}>
             {course_progress}%
           </span>
-          <span className="text-gray-400 text-xs">
+          <span className="text-gray-600 text-xs">
             {t('courses.completed_of', { completed: course_completed_steps, total: course_total_steps })}
           </span>
         </div>
@@ -189,7 +191,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           {/* Certificate or Progress indicator */}
           {course_progress === 100 ? (
             showCertificateUI && (isLoadingCertificate || isLoadingCertificationStatus) ? (
-              <div className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex items-center gap-1.5 text-gray-600">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-500"></div>
                 <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.loading')}</span>
               </div>
@@ -199,13 +201,13 @@ function TrailCourseCard(props: TrailCourseCardProps) {
                 <span className="text-[10px] font-bold uppercase tracking-wider">{t('certificate.certificate')}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-green-600">
+              <div className="flex items-center gap-1.5 text-green-700">
                 <Award size={12} />
                 <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.completed')}</span>
               </div>
             )
           ) : (
-            <div className="flex items-center gap-1.5 text-gray-500">
+            <div className="flex items-center gap-1.5 text-gray-600">
               <BookOpen size={12} />
               <span className="text-[10px] font-bold uppercase tracking-wider">{t('courses.course_progress')}</span>
             </div>
@@ -224,7 +226,8 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           ) : (
             <Link
               href={courseLink}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+
+              className="text-[10px] font-bold text-gray-600 hover:text-gray-900 transition-colors uppercase tracking-wider"
             >
               {t('courses.continue_learning')}
             </Link>

@@ -1,4 +1,14 @@
 {
+  "accessibility": {
+    "image_description": "תיאור תמונה (טקסט חלופי)",
+    "image_description_hint": "תארו את המידע שבתמונה. השאירו ריק רק אם התמונה קישוטית.",
+    "select_all_users": "בחירת כל המשתמשים",
+    "select_user": "בחירת {{name}}",
+    "lesson_content": "תוכן השיעור",
+    "lesson_editor": "עורך השיעור",
+    "skip_content": "דלגו לתוכן הראשי",
+    "statement": "הצהרת נגישות"
+},
   "common": {
     "software_source": "קוד מקור",
     "software_notices": "רישיונות תוכנה",

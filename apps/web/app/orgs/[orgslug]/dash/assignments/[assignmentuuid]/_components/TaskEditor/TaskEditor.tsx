@@ -80,7 +80,7 @@ function AssignmentTaskEditor({ page }: { page?: EditorTab }) {
                                         <TypeIcon size={18} />
                                     </span>
                                     <div className='min-w-0'>
-                                        <p className='text-xs text-neutral-500 tabular-nums'>
+                                        <p className='text-xs text-neutral-600 tabular-nums'>
                                             {taskIndex >= 0 && t('dashboard.assignments.editor.task_position', { number: taskIndex + 1, total: tasks.length })}
                                             {taskIndex >= 0 && ' · '}
                                             {meta.labelKey ? t(meta.labelKey) : meta.label}
@@ -89,7 +89,7 @@ function AssignmentTaskEditor({ page }: { page?: EditorTab }) {
                                             )}
                                         </p>
                                         <h2 className='text-lg font-semibold text-neutral-900 leading-snug break-words'>
-                                            {task.title || <span className='text-neutral-400 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
+                                            {task.title || <span className='text-neutral-600 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
                                         </h2>
                                     </div>
                                 </div>
@@ -124,7 +124,7 @@ function AssignmentTaskEditor({ page }: { page?: EditorTab }) {
                                             aria-selected={active}
                                             onClick={() => setSelectedSubPage(key)}
                                             className={`-mb-px flex items-center gap-1.5 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                                                active ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-800'
+                                                active ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-600 hover:text-neutral-800'
                                             }`}
                                         >
                                             <Icon size={15} />
@@ -147,11 +147,11 @@ function AssignmentTaskEditor({ page }: { page?: EditorTab }) {
             {!hasTask && assignment && tasks.length === 0 && (
                 <div className='flex flex-1 items-center justify-center px-4 py-10 lg:py-6'>
                     <div className='w-full max-w-md bg-white rounded-2xl nice-shadow px-6 py-8 text-center'>
-                        <div className='mx-auto w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-500 flex items-center justify-center'>
+                        <div className='mx-auto w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-600 flex items-center justify-center'>
                             <ClipboardList size={22} />
                         </div>
                         <h2 className='mt-4 text-base font-semibold text-neutral-900'>{t('dashboard.assignments.editor.empty_title')}</h2>
-                        <p className='mt-1 text-sm text-neutral-500'>{t('dashboard.assignments.editor.empty_description')}</p>
+                        <p className='mt-1 text-sm text-neutral-600'>{t('dashboard.assignments.editor.empty_description')}</p>
                         <div className='mt-5'>
                             <TaskCreateActions assignment_uuid={assignment.assignment_object.assignment_uuid} layout='row' />
                         </div>

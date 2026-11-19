@@ -109,7 +109,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
         aria-expanded={isOpen}
         aria-haspopup="true"
         className="bg-white rounded-full px-5 nice-shadow flex items-center space-x-2 p-2.5 text-gray-700 hover:bg-gray-50 transition delay-150 duration-300 ease-in-out"
-        aria-label={t('activities.view_all_activities')}
+        aria-label={t('courses.chapters', { defaultValue: 'Chapters' })}
         title={t('activities.view_all_activities')}
       >
         <ListTree size={17} />
@@ -122,7 +122,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
             <h3 className="text-sm font-semibold text-gray-800">{t('courses.course_content')}</h3>
             <button 
               onClick={() => setIsOpen(false)}
-              className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+              className="text-gray-600 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
             >
               <X size={14} />
             </button>
@@ -191,14 +191,14 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                                   </div>
                                 )}
                               </div>
-                              <div className="flex items-center space-x-1 mt-0.5 text-neutral-400">
+                              <div className="flex items-center space-x-1 mt-0.5 text-neutral-600">
                                 {getActivityTypeIcon(activity.activity_type, activity.activity_sub_type)}
                                 <span className="text-[10px] font-medium">
                                   {getActivityTypeLabel(activity.activity_type, activity.activity_sub_type)}
                                 </span>
                               </div>
                             </div>
-                            <div className="text-neutral-300 group-hover:text-neutral-400 transition-colors cursor-pointer">
+                            <div className="text-neutral-300 group-hover:text-neutral-600 transition-colors cursor-pointer">
                               <ArrowRight size={12} />
                             </div>
                           </div>

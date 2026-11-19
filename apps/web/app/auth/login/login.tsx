@@ -530,19 +530,19 @@ const LoginClient = (props: LoginClientProps) => {
                 <h1 className="text-[28px] md:text-[32px] font-black text-black tracking-tight leading-tight">
                   {t('auth.mfa_title', { defaultValue: 'Two-step verification' })}
                 </h1>
-                <p className="mt-2 text-black/45 text-[15px] font-medium">
+                <p className="mt-2 text-black/65 text-[15px] font-medium">
                   {useBackupCode
                     ? t('auth.mfa_subtitle_backup', { defaultValue: 'Enter one of the backup codes you saved.' })
                     : t('auth.mfa_subtitle', { defaultValue: 'Enter the 6-digit code from your authenticator app.' })}
                 </p>
 
                 <form onSubmit={handleMfaSubmit} className="mt-8">
-                  <label className="block text-[13px] font-semibold text-black/70 mb-1.5">
+                  <label htmlFor="mfa-code" className="block text-[13px] font-semibold text-black/70 mb-1.5">
                     {useBackupCode
                       ? t('auth.mfa_backup_code', { defaultValue: 'Backup code' })
                       : t('auth.mfa_code', { defaultValue: 'Verification code' })}
                   </label>
-                  <input
+                  <input id="mfa-code"
                     type="text"
                     value={mfaCode}
                     onChange={(e) => {
@@ -636,7 +636,7 @@ const LoginClient = (props: LoginClientProps) => {
                       <h2 className="mt-4 text-lg font-bold text-black">
                         {t('auth.magic_sent_title', { defaultValue: 'Check your email' })}
                       </h2>
-                      <p className="mt-2 text-black/45 text-[15px] font-medium max-w-sm">
+                      <p className="mt-2 text-black/65 text-[15px] font-medium max-w-sm">
                         {t('auth.magic_sent_body', {
                           defaultValue:
                             'If an account exists for {{email}}, we just sent it a secure link to sign in. It expires shortly, so use it soon.',
@@ -660,17 +660,17 @@ const LoginClient = (props: LoginClientProps) => {
                   </>
                 ) : (
                   <>
-                    <p className="mt-2 text-black/45 text-[15px] font-medium">
+                    <p className="mt-2 text-black/65 text-[15px] font-medium">
                       {t('auth.magic_subtitle', {
                         defaultValue:
                           'Enter your email and we’ll send you a link that signs you in, no password needed.',
                       })}
                     </p>
                     <form onSubmit={handleMagicLinkRequest} className="mt-8">
-                      <label className="block text-[13px] font-semibold text-black/70 mb-1.5">
+                      <label htmlFor="magic-email" className="block text-[13px] font-semibold text-black/70 mb-1.5">
                         {t('auth.email')}
                       </label>
-                      <input
+                      <input id="magic-email"
                         type="email"
                         value={magicEmail}
                         onChange={(e) => {
@@ -736,7 +736,7 @@ const LoginClient = (props: LoginClientProps) => {
               <>
             {/* Header */}
             <h1 className="text-[28px] md:text-[32px] font-black text-black tracking-tight leading-tight">{t('auth.welcome_back')}</h1>
-            <p className="mt-2 text-black/45 text-[15px] font-medium">
+            <p className="mt-2 text-black/65 text-[15px] font-medium">
               {passwordAllowed
                 ? t('auth.enter_credentials')
                 : t('auth.choose_sign_in_method', {
@@ -827,7 +827,7 @@ const LoginClient = (props: LoginClientProps) => {
                     <div className="w-full border-t border-neutral-200" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-3 text-black/30 bg-white text-xs font-medium">{t('common.or')}</span>
+                    <span className="px-3 text-black/65 bg-white text-xs font-medium">{t('common.or')}</span>
                   </div>
                 </div>
               )}

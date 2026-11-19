@@ -40,7 +40,7 @@ const PathsDashClient = ({ org_id, orgslug }: PathsDashClientProps) => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
             <div>
               <h1 className="text-3xl font-bold mb-1">{t('paths.title')}</h1>
-              <p className="text-sm text-gray-500 mb-4 sm:mb-0">{t('paths.dashboard.subtitle')}</p>
+              <p className="text-sm text-gray-600 mb-4 sm:mb-0">{t('paths.dashboard.subtitle')}</p>
             </div>
             {newPathButton}
           </div>
@@ -69,7 +69,7 @@ const PathsDashClient = ({ org_id, orgslug }: PathsDashClientProps) => {
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-600 mb-2">{t('paths.no_paths')}</h2>
-                <p className="text-lg text-gray-400 max-w-md mx-auto">{t('paths.no_paths_description')}</p>
+                <p className="text-lg text-gray-600 max-w-md mx-auto">{t('paths.no_paths_description')}</p>
                 <div className="mt-6 flex justify-center">{newPathButton}</div>
               </div>
             </div>

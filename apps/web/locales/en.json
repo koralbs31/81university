@@ -1,4 +1,14 @@
 {
+  "accessibility": {
+    "image_description": "Image description (alt text)",
+    "image_description_hint": "Describe the information in this image. Leave empty only for a decorative image.",
+    "select_all_users": "Select all users",
+    "select_user": "Select {{name}}",
+    "lesson_content": "Lesson content",
+    "lesson_editor": "Lesson editor",
+    "skip_content": "Skip to main content",
+    "statement": "Accessibility statement"
+},
   "common": {
     "software_source": "Source code",
     "software_notices": "Software notices",

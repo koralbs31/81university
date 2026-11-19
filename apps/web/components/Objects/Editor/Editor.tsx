@@ -252,6 +252,7 @@ function Editor(props: EditorProps) {
     // Wrap the inline text of callouts saved before they could hold lists
     const editorContent = React.useMemo(() => normalizeCalloutContent(props.content), [props.content]);
     const editor: any = useEditor({
+        editorProps: { attributes: { 'aria-label': t('accessibility.lesson_editor') } },
         editable: true,
         extensions,
         content: editorContent,
@@ -408,9 +409,9 @@ function Editor(props: EditorProps) {
                   </div>
                 </div>
                 <ToolTip content={t('editor.templates.title', 'Templates')}>
-                  <div className="flex bg-neutral-100 hover:bg-neutral-200 transition-all ease-linear h-9 px-3 py-2 font-black justify-center items-center text-sm shadow-sm text-neutral-600 rounded-lg hover:cursor-pointer" role="button" aria-label={t('editor.templates.title', 'Templates')} onClick={() => setTemplatesMode('insert')}>
+                  <button type="button" className="flex bg-neutral-100 hover:bg-neutral-200 transition-all ease-linear h-9 px-3 py-2 font-black justify-center items-center text-sm shadow-sm text-neutral-600 rounded-lg hover:cursor-pointer" aria-label={t('editor.templates.title', 'Templates')} onClick={() => setTemplatesMode('insert')}>
                     <LayoutTemplate size={15}/>
-                  </div>
+                  </button>
                 </ToolTip>
               </div>
               <DividerVerticalIcon style={{

@@ -31,7 +31,7 @@ export default function OnboardingPage() {
           <div className="min-w-0">
             <h1 className="text-3xl font-bold">{t('onboarding.launch_plan')}</h1>
             {!allCompleted && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-600">
                 {intent ? t(`onboarding.intent.${intent}.headline`) : t('onboarding.subtitle')}
               </p>
             )}
@@ -44,7 +44,7 @@ export default function OnboardingPage() {
                   <span className="font-medium text-gray-700 tabular-nums">
                     {t('onboarding.progress_count', { done: completedCount, total: steps.length })}
                   </span>
-                  <span className="text-gray-400">{t('onboarding.minutes_left', { count: minutesLeft })}</span>
+                  <span className="text-gray-600">{t('onboarding.minutes_left', { count: minutesLeft })}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-200">
                   <div

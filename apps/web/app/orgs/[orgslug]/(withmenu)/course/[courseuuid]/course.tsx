@@ -238,15 +238,15 @@ const CourseClient = (props: any) => {
   const _getActivityTypeBadgeColor = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-600'
       case 'TYPE_DOCUMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-600'
       case 'TYPE_DYNAMIC':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-600'
       case 'TYPE_ASSIGNMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-600'
       default:
-        return 'bg-neutral-100 text-neutral-500'
+        return 'bg-neutral-100 text-neutral-600'
     }
   }
 
@@ -362,13 +362,13 @@ const CourseClient = (props: any) => {
                       return (
                         <div
                           key={learningId}
-                          className="flex space-x-2 items-center font-semibold text-gray-500"
+                          className="flex space-x-2 items-center font-semibold text-gray-600"
                         >
                           <div className="px-2 py-2 rounded-full">
                             {learningEmoji ? (
                               <span>{learningEmoji}</span>
                             ) : (
-                              <Check className="text-gray-400" size={15} />
+                              <Check className="text-gray-600" size={15} />
                             )}
                           </div>
                           <p>{learningText}</p>
@@ -400,14 +400,14 @@ const CourseClient = (props: any) => {
                   <button
                     type="button"
                     onClick={() => setAllChapters(!allChaptersExpanded)}
-                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-black/50 transition-colors hover:bg-black/5 hover:text-black/75"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-black/65 transition-colors hover:bg-black/5 hover:text-black/75"
                   >
                     {allChaptersExpanded ? t('shortcuts.collapse_chapters') : t('shortcuts.expand_chapters')}
                     <Keys keys="e" tone="muted" />
                   </button>
                 )}
               </div>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-neutral-600">
                   {t('courses.chapter_count', { count: chapters.length })}
                   {' · '}
                   {t('courses.lesson_count', { count: chapters.reduce((sum: number, chapter: any) => sum + chapter.activities.length, 0) })}
@@ -487,7 +487,7 @@ const CourseClient = (props: any) => {
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center space-x-1 text-sm text-neutral-400 font-normal">
+                          <div className="flex items-center space-x-1 text-sm text-neutral-600 font-normal">
                             <Layers size={16} className="me-1" />
                             <span>{chapter.activities.length} {t('activities.activities')}</span>
                           </div>
@@ -522,7 +522,7 @@ const CourseClient = (props: any) => {
                                 </div>
                                 <div className="flex flex-col grow min-w-0">
                                   <div className="flex items-center space-x-2 w-full">
-                                    <p className={`text-sm font-semibold break-words transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
+                                    <p className={`text-sm font-semibold break-words transition-colors ${locked ? 'text-neutral-600' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
                                     {locked && !dripped && (
                                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
                                         <Lock size={10} />
@@ -537,12 +537,12 @@ const CourseClient = (props: any) => {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="flex items-center space-x-1.5 mt-0.5 text-neutral-400">
+                                  <div className="flex items-center space-x-1.5 mt-0.5 text-neutral-600">
                                     {getActivityTypeIcon(activity.activity_type, activity.activity_sub_type, 10)}
                                     <span className="text-xs font-medium">{getActivityTypeLabel(activity.activity_type, activity.activity_sub_type)}</span>
                                   </div>
                                 </div>
-                                <div className={`transition-colors ${locked ? 'text-neutral-200' : 'text-neutral-300 group-hover:text-neutral-400 cursor-pointer'}`}>
+                                <div className={`transition-colors ${locked ? 'text-neutral-200' : 'text-neutral-300 group-hover:text-neutral-600 cursor-pointer'}`}>
                                   <ArrowRight size={14} />
                                 </div>
                               </div>

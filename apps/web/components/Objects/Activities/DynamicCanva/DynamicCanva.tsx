@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react';
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import TableOfContents from './TableOfContents';
@@ -13,6 +14,7 @@ interface Editor {
     orgUuid?: string;
 }
 function Canva(props: Editor) {
+    const { t } = useTranslation();
     /**
      * Important Note : This is a workaround to enable user interaction features to be implemented easily, like text selection, AI features and other planned features, this is set to true but otherwise it should be set to false.
      * Another workaround is implemented below to disable the editor from being edited by the user by setting the caret-color to transparent and using a custom extension to filter out transactions that add/edit/remove text.
@@ -28,6 +30,8 @@ function Canva(props: Editor) {
         // tap into the text, so ask for neither.
         editorProps: {
             attributes: {
+                'aria-label': t('accessibility.lesson_content'),
+                'aria-readonly': 'true',
                 inputmode: 'none',
                 spellcheck: 'false',
                 autocorrect: 'off',

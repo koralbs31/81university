@@ -68,7 +68,7 @@ function LandingClassic({ courses, orgslug, org_id }: LandingClassicProps) {
                 </h1>
                 {/* Anonymous visitors only ever receive PUBLIC courses from the API,
                     so an empty list here usually means "sign in", not "empty academy". */}
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+                <p className="text-md text-gray-600 mb-6 text-center max-w-xs">
                   {isAuthenticated ? (
                     <ContentPlaceHolderIfUserIsNotAdmin text={t('courses.create_courses_placeholder')} />
                   ) : (

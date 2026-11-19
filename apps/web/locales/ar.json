@@ -1,4 +1,14 @@
 {
+  "accessibility": {
+    "image_description": "وصف الصورة (نص بديل)",
+    "image_description_hint": "صف المعلومات في الصورة. اتركه فارغًا فقط إذا كانت الصورة للزينة.",
+    "select_all_users": "تحديد جميع المستخدمين",
+    "select_user": "تحديد {{name}}",
+    "lesson_content": "محتوى الدرس",
+    "lesson_editor": "محرر الدرس",
+    "skip_content": "تخطي إلى المحتوى الرئيسي",
+    "statement": "بيان إمكانية الوصول"
+},
   "common": {
     "software_source": "الكود المصدري",
     "software_notices": "إشعارات البرمجيات",

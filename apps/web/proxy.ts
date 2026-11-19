@@ -305,7 +305,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   // Public software notices must bypass tenant rewrites and authentication.
-  if (req.nextUrl.pathname === '/software-notices') return NextResponse.next()
+  if (['/software-notices', '/accessibility'].includes(req.nextUrl.pathname)) return NextResponse.next()
 
   const instance = await getInstanceInfo()
   const { pathname, search } = req.nextUrl

@@ -265,12 +265,12 @@ function EvaluateAssignment({
                         />
                         <div className='min-w-0'>
                             <p className='text-sm font-semibold text-neutral-900 truncate'>{displayName ?? '...'}</p>
-                            {user?.email && <p className='text-xs text-neutral-500 truncate'>{user.email}</p>}
+                            {user?.email && <p className='text-xs text-neutral-600 truncate'>{user.email}</p>}
                         </div>
                     </div>
                     <div className='flex flex-wrap items-center gap-2 sm:justify-end'>
                         {submittedDate && (
-                            <span className='text-xs text-neutral-500 tabular-nums'>
+                            <span className='text-xs text-neutral-600 tabular-nums'>
                                 {t('dashboard.assignments.submissions.evaluate_modal.submitted_at', { date: `${submittedDate}${submittedTime ? ` · ${submittedTime}` : ''}` })}
                             </span>
                         )}
@@ -308,7 +308,7 @@ function EvaluateAssignment({
                                         </p>
                                         <div className='mt-1 flex flex-wrap items-center gap-1.5'>
                                             {meta && TypeIcon && (
-                                                <span className='inline-flex items-center gap-1 text-xs text-neutral-500 me-1'>
+                                                <span className='inline-flex items-center gap-1 text-xs text-neutral-600 me-1'>
                                                     <TypeIcon size={12} />
                                                     {meta.labelKey ? t(meta.labelKey) : meta.label}
                                                 </span>
@@ -385,14 +385,14 @@ function EvaluateAssignment({
                                 <p className='text-sm font-semibold text-neutral-900'>
                                     {t('dashboard.assignments.submissions.ungraded_title', { defaultValue: 'Formative (not graded)' })}
                                 </p>
-                                <p className='mt-0.5 text-xs text-neutral-500'>
+                                <p className='mt-0.5 text-xs text-neutral-600'>
                                     {t('dashboard.assignments.submissions.ungraded_description', { defaultValue: 'This assignment is handed in for review only. No score is recorded.' })}
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div>
-                            <p className='text-xs text-neutral-500'>{t('dashboard.assignments.submissions.preview.current_grade')}</p>
+                            <p className='text-xs text-neutral-600'>{t('dashboard.assignments.submissions.preview.current_grade')}</p>
                             {liveGrade ? (
                                 <>
                                     <div className='mt-1.5 flex items-center gap-3'>
@@ -401,7 +401,7 @@ function EvaluateAssignment({
                                         </span>
                                         <div className='min-w-0'>
                                             <p className='text-sm font-semibold text-neutral-900 tabular-nums'>{liveGrade.points_summary}</p>
-                                            <p className='text-xs text-neutral-500 tabular-nums'>{liveGrade.percentage_display}</p>
+                                            <p className='text-xs text-neutral-600 tabular-nums'>{liveGrade.percentage_display}</p>
                                         </div>
                                     </div>
                                     <div className='mt-2.5'>
@@ -424,9 +424,9 @@ function EvaluateAssignment({
                     {!isUngraded && (
                         <div className='flex flex-col gap-1.5 border-t border-neutral-100 pt-4'>
                             <label htmlFor={`overall-feedback-${user_id}`} className='flex items-center gap-1.5 text-sm font-semibold text-neutral-900'>
-                                <MessageSquare size={14} className='text-neutral-400' />
+                                <MessageSquare size={14} className='text-neutral-600' />
                                 {t('dashboard.assignments.submissions.feedback.label')}
-                                <span className='text-xs font-normal text-neutral-400'>
+                                <span className='text-xs font-normal text-neutral-600'>
                                     ({t('dashboard.assignments.submissions.feedback.optional')})
                                 </span>
                             </label>
@@ -436,9 +436,9 @@ function EvaluateAssignment({
                                 onChange={(e) => setFeedback(e.target.value)}
                                 placeholder={t('dashboard.assignments.submissions.feedback.placeholder')}
                                 rows={4}
-                                className='w-full px-3 py-2 text-sm bg-white rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-300 placeholder:text-neutral-400 resize-y'
+                                className='w-full px-3 py-2 text-sm bg-white rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-300 placeholder:text-neutral-600 resize-y'
                             />
-                            <p className='text-xs text-neutral-400 leading-snug'>
+                            <p className='text-xs text-neutral-600 leading-snug'>
                                 {t('dashboard.assignments.submissions.feedback.hint')}
                             </p>
                         </div>
@@ -452,14 +452,14 @@ function EvaluateAssignment({
                                     <Check size={16} />
                                     {t('dashboard.assignments.submissions.actions.finalize')}
                                 </button>
-                                <p className='text-xs text-neutral-500 leading-snug -mt-0.5 mb-1'>
+                                <p className='text-xs text-neutral-600 leading-snug -mt-0.5 mb-1'>
                                     {t('dashboard.assignments.submissions.actions.finalize_description')}
                                 </p>
                                 <button type='button' onClick={gradeAssignment} className={`${BTN_SECONDARY} w-full`}>
                                     <BookOpenCheck size={16} />
                                     {t('dashboard.assignments.submissions.actions.set_final_grade')}
                                 </button>
-                                <p className='text-xs text-neutral-500 leading-snug -mt-0.5 mb-1'>
+                                <p className='text-xs text-neutral-600 leading-snug -mt-0.5 mb-1'>
                                     {t('dashboard.assignments.submissions.actions.set_final_grade_description')}
                                 </p>
                             </>

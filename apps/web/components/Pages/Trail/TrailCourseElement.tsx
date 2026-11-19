@@ -145,7 +145,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
         {course_progress === 100 && (
           <div className="mt-2 pt-2 border-t border-gray-100">
             {isLoadingCertificate ? (
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
+              <div className="flex items-center space-x-1 text-xs text-gray-600">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-500"></div>
                 <span>{t('common.loading')}</span>
               </div>
@@ -168,7 +168,7 @@ function TrailCourseElement(props: TrailCourseElementProps) {
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
+              <div className="flex items-center space-x-1 text-xs text-gray-600">
                 <Award className="w-3 h-3 text-gray-300" />
                 <span>{t('certificate.no_certificate')}</span>
               </div>

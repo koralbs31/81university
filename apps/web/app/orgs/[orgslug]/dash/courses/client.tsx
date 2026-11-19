@@ -334,7 +334,7 @@ function CoursesHome(params: CourseProps) {
           </div>
           <AuthenticatedClientElement checkMethod="roles" action="create" ressourceType="courses" orgId={orgId!}>
             <div className="flex items-center space-x-2">
-              {courseLimitReached && (<div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
+              {courseLimitReached && (<div className="text-xs text-gray-600 bg-gray-100 px-3 py-2 rounded-lg">
                   {t('dashboard.courses.limit_reached', { limit: courseLimit })}
                 </div>)}
               <Modal isDialogOpen={importCourseModal} onOpenChange={(open) => {
@@ -365,9 +365,9 @@ function CoursesHome(params: CourseProps) {
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">
             {/* Search Input */}
             <div className="relative w-full sm:w-80">
-              <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"/>
+              <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-600 w-4 h-4"/>
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t('courses.search_courses')} className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"/>
-              {searchQuery && (<button onClick={() => setSearchQuery('')} className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              {searchQuery && (<button onClick={() => setSearchQuery('')} className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-600">
                   <X className="w-4 h-4"/>
                 </button>)}
             </div>
@@ -375,7 +375,7 @@ function CoursesHome(params: CourseProps) {
             {/* Usergroup Filter */}
             {usergroupsAvailable && usergroups.length > 0 && (<div className="relative flex items-center gap-1.5">
                 <div className="relative">
-                  <Users className="absolute start-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none"/>
+                  <Users className="absolute start-2.5 top-1/2 transform -translate-y-1/2 text-gray-600 w-4 h-4 pointer-events-none"/>
                   <select value={selectedUsergroupId} onChange={(e) => handleUsergroupChange(e.target.value)} className="ps-8 pe-8 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0 appearance-none cursor-pointer min-w-[160px]">
                     <option value="">{t('courses.usergroup_filter.all_courses')}</option>
                     {usergroups.map((ug: any) => (<option key={ug.id} value={String(ug.id)}>
@@ -383,12 +383,12 @@ function CoursesHome(params: CourseProps) {
                       </option>))}
                   </select>
                 </div>
-                <button onClick={() => setShowUsergroupInfo(!showUsergroupInfo)} className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100">
+                <button onClick={() => setShowUsergroupInfo(!showUsergroupInfo)} className="p-1.5 text-gray-600 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100">
                   <Info className="w-3.5 h-3.5"/>
                 </button>
                 {showUsergroupInfo && (<div className="absolute top-full start-0 mt-2 z-50 w-72 bg-white nice-shadow rounded-lg p-3 border border-gray-100">
                     <p className="text-xs font-semibold text-gray-700 mb-1">{t('courses.usergroup_filter.info_title')}</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
+                    <p className="text-xs text-gray-600 leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
                   </div>)}
               </div>)}
           </div>
@@ -396,7 +396,7 @@ function CoursesHome(params: CourseProps) {
           {/* Bulk Actions - shown when items selected */}
           {selectedCourses.size > 0 && (<AuthenticatedClientElement checkMethod="roles" action="update" ressourceType="courses" orgId={orgId!}>
               <div className="flex flex-wrap items-center gap-2 sm:ms-auto">
-                <span className="text-sm font-medium text-gray-500 px-2">
+                <span className="text-sm font-medium text-gray-600 px-2">
                   {t('courses.selected_count', { count: selectedCourses.size })}
                 </span>
                 <button onClick={selectAllCourses} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors">
@@ -423,7 +423,7 @@ function CoursesHome(params: CourseProps) {
         </div>)}
 
       {/* Search Results Info */}
-      {searchQuery && (<div className="mb-4 text-sm text-gray-500">
+      {searchQuery && (<div className="mb-4 text-sm text-gray-600">
           {t('courses.search_results', { count: filteredCourses.length, query: searchQuery })}
         </div>)}
 
@@ -435,7 +435,7 @@ function CoursesHome(params: CourseProps) {
               <h2 className="text-xl font-semibold text-gray-600 mb-2">
                 {t('courses.no_search_results')}
               </h2>
-              <p className="text-gray-400">
+              <p className="text-gray-600">
                 {t('courses.try_different_search')}
               </p>
             </div>
@@ -450,7 +450,7 @@ function CoursesHome(params: CourseProps) {
               <h2 className="text-2xl font-bold text-gray-600 mb-2">
                 {t('dashboard.courses.no_courses')}
               </h2>
-              <p className="text-lg text-gray-400">
+              <p className="text-lg text-gray-600">
                 {isUserAdmin ? (t('dashboard.courses.create_course_placeholder')) : (t('dashboard.courses.no_courses_available'))}
               </p>
               {isUserAdmin && !courseLimitReached && (<div className="mt-6">
@@ -467,7 +467,7 @@ function CoursesHome(params: CourseProps) {
       <CatalogPagination currentPage={currentPage} totalPages={totalPages} pageNumbers={pageNumbers} onPageChange={goToPage} previousLabel={t('pagination.previous')} nextLabel={t('pagination.next')} className="mt-8 mb-6"/>
 
       {/* Pagination info */}
-      {totalPages > 1 && (<div className="mb-6 text-center text-sm text-gray-500">
+      {totalPages > 1 && (<div className="mb-6 text-center text-sm text-gray-600">
           {t('pagination.showing_page', { current: currentPage, total: totalPages })}
         </div>)}
     </div>

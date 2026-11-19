@@ -27,7 +27,7 @@ export function SearchTrigger({ className = '', primaryColor = '', isMobile = fa
     <button
       type="button"
       onClick={() => setOpen(true)}
-      aria-label={t('search.palette.trigger')}
+      aria-label={isMobile ? t('search.palette.trigger') : undefined}
       aria-haspopup="dialog"
       className={`group relative flex h-9 w-full items-center rounded-xl ps-11 pe-3 text-start text-sm
                   transition-all focus:outline-none focus:ring-1 ${colors.searchBg} ${className}`}
@@ -37,7 +37,7 @@ export function SearchTrigger({ className = '', primaryColor = '', isMobile = fa
       </span>
       <span className="lh-search-label flex-1 truncate opacity-60">{t('search.palette.placeholder')}</span>
       {!isMobile && (
-        <kbd
+        <kbd aria-hidden="true"
           className="lh-search-kbd ms-2 hidden shrink-0 items-center rounded-md border border-current/10 px-1.5 py-0.5
                      font-sans text-[10.5px] font-medium leading-none tracking-wide opacity-50 sm:inline-flex"
         >

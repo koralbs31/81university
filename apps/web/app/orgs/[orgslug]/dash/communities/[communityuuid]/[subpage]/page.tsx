@@ -102,7 +102,7 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
         <div className="py-2 sm:my-2">
           <div className="w-full flex flex-col space-y-1 min-w-0">
             <div className="sm:pt-3 flex font-bold text-2xl sm:text-4xl tracking-tighter truncate">{H1Label}</div>
-            <div className="hidden sm:flex font-medium text-gray-400 text-md truncate">{H2Label}</div>
+            <div className="hidden sm:flex font-medium text-gray-600 text-md truncate">{H2Label}</div>
           </div>
         </div>
         <DashTabBar tabs={tabs} />

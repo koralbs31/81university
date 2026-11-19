@@ -174,7 +174,7 @@ function DashMobileMenu() {
                   plan === 'enterprise' ? 'text-amber-400' :
                   plan === 'pro' ? 'text-purple-400' :
                   plan === 'standard' ? 'text-blue-400' :
-                  'text-white/40'
+                  'text-white/75'
                 )}>{planLabel}</p>
               </div>
             </div>
@@ -184,7 +184,7 @@ function DashMobileMenu() {
               <button
                 type="button"
                 onClick={() => { close(); openSearch() }}
-                className="lh-press flex items-center gap-2.5 w-full h-11 px-3.5 rounded-xl bg-white/[0.07] text-white/50 text-[15px]"
+                className="lh-press flex items-center gap-2.5 w-full h-11 px-3.5 rounded-xl bg-white/[0.07] text-white/75 text-[15px]"
               >
                 <MagnifyingGlass size={18} weight="bold" />
                 <span>{t('common.search')}</span>
@@ -239,6 +239,7 @@ function DashMobileMenu() {
               )}
               <SheetRow href="https://github.com/koralbs31/81university" external Icon={Browser} label={t('common.software_source')} />
               <SheetRow href="/software-notices" Icon={Book} label="AGPL-3.0" />
+            <SheetRow href="/accessibility" Icon={Book} label={t('accessibility.statement')} />
               <SheetRow
                 Icon={ChatCircleDots}
                 label={t('common.help_menu.report_feedback')}
@@ -251,13 +252,13 @@ function DashMobileMenu() {
               <UserAvatar width={40} rounded="rounded-full" shadow="shadow-none" />
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-semibold text-white truncate leading-tight">{session?.data?.user?.username}</p>
-                <p className="text-xs text-white/40 truncate">{session?.data?.user?.email}</p>
+                <p className="text-xs text-white/75 truncate">{session?.data?.user?.email}</p>
               </div>
               <button
                 type="button"
                 onClick={logOutUI}
                 aria-label={t('user.sign_out')}
-                className="lh-press flex items-center justify-center h-10 w-10 rounded-xl text-white/50 bg-white/[0.06] active:text-red-400"
+                className="lh-press flex items-center justify-center h-10 w-10 rounded-xl text-white/75 bg-white/[0.06] active:text-red-400"
               >
                 <SignOut size={18} weight="fill" data-dir-flip />
               </button>

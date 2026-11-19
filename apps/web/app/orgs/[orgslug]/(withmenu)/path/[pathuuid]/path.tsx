@@ -37,7 +37,7 @@ export default function PathClient({ orgslug, pathuuid }: { orgslug: string; pat
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Route className="w-10 h-10 text-gray-300 mb-3" />
             <h1 className="text-xl font-bold text-gray-700">{t('paths.not_found')}</h1>
-            <Link href={getUriWithOrg(orgslug, '/paths')} className="mt-4 text-sm font-medium text-gray-500 hover:text-gray-900">
+            <Link href={getUriWithOrg(orgslug, '/paths')} className="mt-4 text-sm font-medium text-gray-600 hover:text-gray-900">
               {t('paths.back_to_paths')}
             </Link>
           </div>
@@ -96,7 +96,7 @@ function PathView({ path, orgslug }: { path: Path; orgslug: string }) {
             loading="eager"
             className="block ring-1 ring-black/10 rounded-lg shadow-xl w-full h-[200px] md:h-[400px]"
           />
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-5 text-sm font-medium text-neutral-500">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-5 text-sm font-medium text-neutral-600">
             {meta.map((item, i) => (
               <React.Fragment key={item}>
                 {i > 0 && <span className="text-neutral-300">·</span>}
@@ -113,7 +113,7 @@ function PathView({ path, orgslug }: { path: Path; orgslug: string }) {
           <PathActions path={path} orgslug={orgslug} nextCourse={nextCourse} signedIn={signedIn} />
           {path.certificate_enabled && (
             <div className={`${BOX} p-4 space-y-3`}>
-              <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wider flex items-center gap-1.5">
                 <Award size={13} />
                 {completed && progress?.certificate_uuid ? t('paths.certificate_earned') : t('paths.certificate_included')}
               </div>
@@ -137,7 +137,7 @@ function PathView({ path, orgslug }: { path: Path; orgslug: string }) {
                   <ArrowRight size={14} className="rtl:rotate-180" />
                 </Link>
               ) : (
-                <p className="text-xs text-neutral-500 leading-relaxed">{t('paths.certificate_explainer')}</p>
+                <p className="text-xs text-neutral-600 leading-relaxed">{t('paths.certificate_explainer')}</p>
               )}
             </div>
           )}
@@ -148,7 +148,7 @@ function PathView({ path, orgslug }: { path: Path; orgslug: string }) {
         <div className="flex items-end justify-between gap-3">
           <h2 className="py-5 text-xl md:text-2xl font-bold">{t('paths.courses_in_path')}</h2>
           {electives.length > 0 && path.electives_required > 0 && (
-            <span className="pb-5 text-sm text-neutral-500">
+            <span className="pb-5 text-sm text-neutral-600">
               {t('paths.electives_rule', {
                 count: Math.min(path.electives_required, electives.length),
                 total: electives.length,
@@ -157,7 +157,7 @@ function PathView({ path, orgslug }: { path: Path; orgslug: string }) {
           )}
         </div>
         {path.courses.length === 0 ? (
-          <div className={`${BOX} p-8 text-center text-sm text-neutral-500`}>{t('paths.no_courses_yet')}</div>
+          <div className={`${BOX} p-8 text-center text-sm text-neutral-600`}>{t('paths.no_courses_yet')}</div>
         ) : (
           <ol className={`${BOX} divide-y divide-neutral-100`}>
             {path.courses.map((item, index) => (
@@ -307,7 +307,7 @@ function PathActions({
               {started ? (
                 <span className="text-lg font-bold text-gray-800">{progress!.percent}%</span>
               ) : (
-                <Route className="w-6 h-6 text-neutral-400" />
+                <Route className="w-6 h-6 text-neutral-600" />
               )}
             </div>
           </div>
@@ -315,7 +315,7 @@ function PathActions({
             <div className="text-sm font-medium text-gray-900">
               {completed ? t('paths.completed') : started ? t('paths.your_progress') : t('paths.ready_to_begin')}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-600">
               {started
                 ? t('paths.progress_long', { done: progress!.courses_done, total: progress!.courses_needed })
                 : t('paths.start_hint')}
@@ -329,7 +329,7 @@ function PathActions({
           type="button"
           onClick={leave}
           disabled={busy}
-          className="w-full text-xs font-medium text-neutral-400 hover:text-neutral-700 transition-colors"
+          className="w-full text-xs font-medium text-neutral-600 hover:text-neutral-700 transition-colors"
         >
           {t('paths.leave_path')}
         </button>
@@ -363,7 +363,7 @@ function PathCourseRow({
       <Check size={13} strokeWidth={3} />
     </span>
   ) : blocked ? (
-    <span className="w-6 h-6 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center">
+    <span className="w-6 h-6 rounded-full bg-neutral-100 text-neutral-600 flex items-center justify-center">
       <Lock size={12} />
     </span>
   ) : (
@@ -388,7 +388,7 @@ function PathCourseRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           <p
-            className={`font-semibold truncate ${blocked ? 'text-neutral-400' : 'text-neutral-700 group-hover:text-neutral-900'}`}
+            className={`font-semibold truncate ${blocked ? 'text-neutral-600' : 'text-neutral-700 group-hover:text-neutral-900'}`}
             dir="auto"
           >
             {course.restricted ? t('paths.restricted_course') : course.name}
@@ -399,9 +399,9 @@ function PathCourseRow({
             </span>
           )}
         </div>
-        <div className="text-xs font-medium text-neutral-400 mt-0.5 truncate">{details.join(' · ')}</div>
+        <div className="text-xs font-medium text-neutral-600 mt-0.5 truncate">{details.join(' · ')}</div>
       </div>
-      {!blocked && <ArrowRight size={14} className="text-neutral-300 group-hover:text-neutral-400 rtl:rotate-180 shrink-0" />}
+      {!blocked && <ArrowRight size={14} className="text-neutral-300 group-hover:text-neutral-600 rtl:rotate-180 shrink-0" />}
     </div>
   )
 

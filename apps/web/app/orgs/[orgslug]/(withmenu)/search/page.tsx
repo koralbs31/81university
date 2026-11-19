@@ -316,7 +316,7 @@ function SearchPage() {
                     <h2 className="text-[11px] font-semibold uppercase tracking-wider text-black/50 mb-3 flex items-center gap-2">
                       <section.icon size={13}/>
                       {t(`search.types.${section.key}`)}
-                      <span className="text-black/30 font-normal normal-case tracking-normal">
+                      <span className="text-black/65 font-normal normal-case tracking-normal">
                         ({section.total(results)})
                       </span>
                     </h2>
@@ -369,7 +369,7 @@ function ResourceCard({ href, imageUrl, fallbackIcon: FallbackIcon, title, subti
         onError={(e) => {
                 if (!e.currentTarget.src.endsWith('/empty_thumbnail.png'))
                     e.currentTarget.src = '/empty_thumbnail.png';
-            }}/>) : (<FallbackIcon size={28} className="text-black/30"/>)}
+            }}/>) : (<FallbackIcon size={28} className="text-black/65"/>)}
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>

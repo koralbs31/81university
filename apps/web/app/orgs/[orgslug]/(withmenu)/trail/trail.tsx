@@ -83,7 +83,7 @@ function Trail(params: any) {
                   disabled={isQuittingAll}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors
                     ${isQuittingAll
-                      ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                      ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
                       : 'bg-red-50 text-red-700 hover:bg-red-100'
                     }`}
                 >
@@ -125,7 +125,7 @@ function Trail(params: any) {
             <h1 className="text-xl font-bold text-gray-600 mb-2">
               {t('user.no_courses_in_progress')}
             </h1>
-            <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+            <p className="text-md text-gray-600 mb-6 text-center max-w-xs">
               {t('user.start_course_to_see_progress')}
             </p>
           </div>

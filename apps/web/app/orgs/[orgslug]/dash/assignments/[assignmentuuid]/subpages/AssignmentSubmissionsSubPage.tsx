@@ -188,19 +188,19 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                 <div className="flex flex-col xl:flex-row xl:items-center gap-3">
                     {/* Search */}
                     <div className="relative flex-1 min-w-0 xl:max-w-sm">
-                        <Search size={16} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                        <Search size={16} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-neutral-600" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={t('dashboard.assignments.submissions.search_placeholder')}
-                            className="w-full h-10 ps-10 pe-9 text-sm bg-white nice-shadow rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/10 placeholder:text-neutral-400"
+                            className="w-full h-10 ps-10 pe-9 text-sm bg-white nice-shadow rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/10 placeholder:text-neutral-600"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
                                 aria-label={t('dashboard.assignments.home.clear_search')}
-                                className="absolute end-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                                className="absolute end-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-600"
                             >
                                 <X size={14} />
                             </button>
@@ -220,12 +220,12 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                                             aria-selected={active}
                                             onClick={() => setStatusFilter(filter.key)}
                                             className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
-                                                active ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-800'
+                                                active ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-800'
                                             }`}
                                         >
                                             {filter.icon}
                                             <span>{filter.label}</span>
-                                            <span className={`tabular-nums ${active ? 'text-neutral-500' : 'text-neutral-400'}`}>{filter.count}</span>
+                                            <span className={`tabular-nums ${active ? 'text-neutral-600' : 'text-neutral-600'}`}>{filter.count}</span>
                                         </button>
                                     );
                                 })}
@@ -248,7 +248,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                                 <>
                                     <div className="fixed inset-0 z-10" onClick={() => setSortDropdownOpen(false)} />
                                     <div role="menu" className="absolute end-0 top-full mt-2 z-20 bg-white nice-shadow rounded-xl p-1.5 min-w-[210px]">
-                                        <p className="px-2.5 pt-1 pb-1.5 text-xs text-neutral-500">{t('dashboard.assignments.submissions.sort.label')}</p>
+                                        <p className="px-2.5 pt-1 pb-1.5 text-xs text-neutral-600">{t('dashboard.assignments.submissions.sort.label')}</p>
                                         {sortOptions.map((option) => {
                                             const active = sortField === option.field;
                                             return (
@@ -270,7 +270,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                                                 >
                                                     <span>{option.label}</span>
                                                     {active && (
-                                                        <span className="text-neutral-400 text-xs">
+                                                        <span className="text-neutral-600 text-xs">
                                                             {sortDirection === 'asc' ? '↑' : '↓'}
                                                         </span>
                                                     )}
@@ -326,7 +326,7 @@ function SubmissionStat({
         <div className={`flex items-center gap-3 bg-white nice-shadow rounded-2xl px-4 py-3.5 min-w-0 ${highlight ? 'ring-1 ring-amber-200' : ''}`}>
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClass}`}>{icon}</div>
             <div className="min-w-0">
-                <p className="text-xs text-neutral-500 truncate">{label}</p>
+                <p className="text-xs text-neutral-600 truncate">{label}</p>
                 {value === null ? (
                     <div className="mt-1 h-5 w-8 rounded bg-neutral-100 animate-pulse" />
                 ) : (
@@ -487,12 +487,12 @@ function SubmissionsList({
     if (filtered.length === 0) {
         return (
             <div className="bg-white nice-shadow rounded-2xl flex flex-col items-center justify-center text-center py-16 px-6 gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-600 flex items-center justify-center">
                     <Inbox size={22} />
                 </div>
                 <p className="text-base font-semibold text-neutral-900">{t('dashboard.assignments.submissions.empty')}</p>
                 {submissions.length === 0 && (
-                    <p className="text-sm text-neutral-500 max-w-sm">{t('dashboard.assignments.submissions.empty_description')}</p>
+                    <p className="text-sm text-neutral-600 max-w-sm">{t('dashboard.assignments.submissions.empty_description')}</p>
                 )}
             </div>
         );
@@ -500,7 +500,7 @@ function SubmissionsList({
 
     return (
         <div className={`bg-white nice-shadow rounded-2xl overflow-hidden ${SUB_TABLE_GRID}`}>
-            <div className={`hidden ${SUB_ROW_GRID} px-5 py-3 border-b border-neutral-100 text-xs font-medium text-neutral-500`}>
+            <div className={`hidden ${SUB_ROW_GRID} px-5 py-3 border-b border-neutral-100 text-xs font-medium text-neutral-600`}>
                 <span>{t('dashboard.assignments.submissions.columns.learner')}</span>
                 <span>{t('dashboard.assignments.submissions.sort.date')}</span>
                 <span>{t('assignments.attempt_label')}</span>
@@ -609,7 +609,7 @@ function SubmissionRow({
                 {submission.grade_display?.display_grade ?? submission.grade}
             </Chip>
             {submission.grade_display?.points_summary && (
-                <span className="text-xs text-neutral-500 tabular-nums truncate">{submission.grade_display.points_summary}</span>
+                <span className="text-xs text-neutral-600 tabular-nums truncate">{submission.grade_display.points_summary}</span>
             )}
         </span>
     ) : (
@@ -650,7 +650,7 @@ function SubmissionRow({
                 />
                 <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-neutral-900 truncate">{displayName}</p>
-                    {user?.email && <p className="text-xs text-neutral-500 truncate">{user.email}</p>}
+                    {user?.email && <p className="text-xs text-neutral-600 truncate">{user.email}</p>}
                 </div>
                 <span className="xl:hidden shrink-0">
                     <Chip tone={status.tone} icon={status.icon}>{status.label}</Chip>
@@ -659,7 +659,7 @@ function SubmissionRow({
 
             {/* Compact meta + action (below xl) */}
             <div className="xl:hidden mt-2.5 ps-[52px] flex items-center gap-3">
-                <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-neutral-500">
+                <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-neutral-600">
                     <span className="tabular-nums">{dateStr} · {timeStr}</span>
                     {attempt > 1 && (
                         <Chip tone="sky" icon={<RotateCcw size={12} />}>{t('assignments.attempt_count', { current: attempt })}</Chip>
@@ -672,7 +672,7 @@ function SubmissionRow({
             {/* Submitted */}
             <div className="hidden xl:block min-w-0">
                 <p className="text-sm text-neutral-700 tabular-nums truncate">{dateStr}</p>
-                <p className="text-xs text-neutral-400 tabular-nums">{timeStr}</p>
+                <p className="text-xs text-neutral-600 tabular-nums">{timeStr}</p>
             </div>
 
             {/* Attempt */}

@@ -122,7 +122,7 @@ function ImageBlockComponent(props: any) {
     };
     const uploadedImageUrl = blockObject ? getActivityBlockMediaDirectory(org?.org_uuid, course?.courseStructure?.course_uuid, blockObject.content.activity_uuid || props.extension.options.activity.activity_uuid, blockObject.block_uuid, fileId || '', 'imageBlock') : null;
     const imageUrl = unsplashUrl || uploadedImageUrl;
-    const unsplashCredit = unsplashUrl && unsplashPhotographerName ? (<p className="mt-2 text-[11px] text-neutral-500">
+    const unsplashCredit = unsplashUrl && unsplashPhotographerName ? (<p className="mt-2 text-[11px] text-neutral-600">
       Photo by{' '}
       <a href={withUtm(unsplashPhotographerUrl) || withUtm(unsplashPhotoUrl)} target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-700">
         {unsplashPhotographerName}
@@ -155,11 +155,11 @@ function ImageBlockComponent(props: any) {
             <div className={`relative group ${phoneFullWidth}`} style={viewFrameStyle}>
               {/* On touch screens tapping the picture opens the viewer, since
               the hover controls below never show there. Desktop keeps them. */}
-              <img src={imageUrl} alt="" onClick={() => {
+              <img src={imageUrl} alt={props.node.attrs.alt || ''} onClick={() => {
                 if (window.matchMedia('(hover: none)').matches)
                     handleExpand();
             }} className="rounded-lg max-md:rounded-xl max-w-full h-auto w-full"/>
-              <div className="absolute top-2 end-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-2 end-2 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                 <button onClick={handleExpand} className="p-2 outline-none bg-black/50 hover:bg-black/70 rounded-lg transition-colors" title={t('editor.blocks.image_block.expand_image')}>
                   <ArrowsOut weight="duotone" className="w-4 h-4 text-white"/>
                 </button>
@@ -175,7 +175,7 @@ function ImageBlockComponent(props: any) {
         </NodeViewWrapper>
 
         <Modal isDialogOpen={isModalOpen} onOpenChange={setIsModalOpen} dialogTitle={t('editor.blocks.image_block.viewer_title')} minWidth="lg" minHeight="lg" dialogContent={<div className="w-full flex flex-col items-center justify-center">
-              <img src={imageUrl} alt="" className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-lg"/>
+              <img src={imageUrl} alt={props.node.attrs.alt || ''} className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-lg"/>
               {unsplashCredit}
             </div>}/>
       </>);
@@ -190,8 +190,8 @@ function ImageBlockComponent(props: any) {
           {/* Header */}
           <div className="flex items-center gap-2 mb-3">
             {/* eslint-disable-next-line jsx-a11y/alt-text -- `Image` is a phosphor-icons icon, not an <img> element */}
-            <Image weight="duotone" className="text-neutral-400" size={16}/>
-            <span className="uppercase tracking-widest text-xs font-bold text-neutral-400">
+            <Image weight="duotone" className="text-neutral-600" size={16}/>
+            <span className="uppercase tracking-widest text-xs font-bold text-neutral-600">
               {t('editor.blocks.image')}
             </span>
           </div>
@@ -208,18 +208,18 @@ function ImageBlockComponent(props: any) {
                 `}>
                 <input ref={fileInputRef} type="file" onChange={handleImageChange} accept={SUPPORTED_FILES} className="hidden"/>
                 {isLoading ? (<div className="space-y-3">
-                    <CircleNotch weight="duotone" className="w-8 h-8 animate-spin mx-auto text-neutral-500"/>
+                    <CircleNotch weight="duotone" className="w-8 h-8 animate-spin mx-auto text-neutral-600"/>
                     <p className="text-sm text-neutral-600">{t('editor.blocks.image_block.uploading')} {progress}%</p>
                     <div className="w-48 h-1 bg-neutral-200 rounded-full mx-auto overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
                       <div className="h-full bg-blue-500 rounded-full transition-all duration-200" style={{ width: `${progress}%` }}/>
                     </div>
                   </div>) : (<div className="space-y-2">
-                    <UploadSimple weight="duotone" className="w-7 h-7 mx-auto text-neutral-400"/>
+                    <UploadSimple weight="duotone" className="w-7 h-7 mx-auto text-neutral-600"/>
                     <div>
                       <p className="text-sm font-medium text-neutral-700">
                         {t('editor.blocks.image_block.drop_or_browse')}
                       </p>
-                      <p className="text-xs text-neutral-500 mt-1">
+                      <p className="text-xs text-neutral-600 mt-1">
                         {t('editor.blocks.image_block.supported_formats')}
                       </p>
                     </div>
@@ -233,6 +233,14 @@ function ImageBlockComponent(props: any) {
               <WarningCircle weight="duotone" size={16}/>
               {error}
             </div>)}
+
+          {imageUrl && isEditable && (
+            <label className="block w-full text-sm text-neutral-700">
+              {t('accessibility.image_description')}
+              <input type="text" value={props.node.attrs.alt || ''} onChange={(event) => props.updateAttributes({ alt: event.target.value })} className="mt-1 w-full rounded-md border border-neutral-400 bg-white px-3 py-2 text-neutral-900" />
+              <span className="mt-1 block text-xs">{t('accessibility.image_description_hint')}</span>
+            </label>
+          )}
 
           {/* Image display - edit mode */}
           {imageUrl && isEditable && (<div className={`w-full flex flex-col ${getItemsAlignmentClass()}`}>
@@ -265,19 +273,19 @@ function ImageBlockComponent(props: any) {
                 });
             }}>
                 <div className="relative">
-                  <img src={imageUrl || ''} alt="" className="rounded-lg nice-shadow max-w-full h-auto" style={{ width: '100%' }}/>
+                  <img src={imageUrl || ''} alt={props.node.attrs.alt || ''} className="rounded-lg nice-shadow max-w-full h-auto" style={{ width: '100%' }}/>
                   <div className="absolute top-2 end-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 opacity-80 hover:opacity-100 transition-opacity">
-                    <button onClick={() => handleAlignmentChange('left')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'left' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-500'}`} title={t('editor.blocks.common.align_left')}>
+                    <button onClick={() => handleAlignmentChange('left')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'left' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-600'}`} title={t('editor.blocks.common.align_left')}>
                       <TextAlignLeft weight="duotone" size={14}/>
                     </button>
-                    <button onClick={() => handleAlignmentChange('center')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'center' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-500'}`} title={t('editor.blocks.common.align_center')}>
+                    <button onClick={() => handleAlignmentChange('center')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'center' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-600'}`} title={t('editor.blocks.common.align_center')}>
                       <TextAlignCenter weight="duotone" size={14}/>
                     </button>
-                    <button onClick={() => handleAlignmentChange('right')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'right' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-500'}`} title={t('editor.blocks.common.align_right')}>
+                    <button onClick={() => handleAlignmentChange('right')} className={`p-1.5 rounded-md transition-colors outline-none ${alignment === 'right' ? 'bg-neutral-200 text-neutral-700' : 'hover:bg-neutral-100 text-neutral-600'}`} title={t('editor.blocks.common.align_right')}>
                       <TextAlignRight weight="duotone" size={14}/>
                     </button>
                     <div className="w-px h-4 bg-neutral-200 mx-0.5"></div>
-                    <button onClick={handleExpand} className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-500 transition-colors outline-none" title={t('editor.blocks.image_block.expand_image')}>
+                    <button onClick={handleExpand} className="p-1.5 rounded-md hover:bg-neutral-100 text-neutral-600 transition-colors outline-none" title={t('editor.blocks.image_block.expand_image')}>
                       <ArrowsOut weight="duotone" size={14}/>
                     </button>
                   </div>
@@ -292,7 +300,7 @@ function ImageBlockComponent(props: any) {
       </NodeViewWrapper>
 
       {imageUrl && (<Modal isDialogOpen={isModalOpen} onOpenChange={setIsModalOpen} dialogTitle={t('editor.blocks.image_block.viewer_title')} minWidth="lg" minHeight="lg" dialogContent={<div className="w-full flex flex-col items-center justify-center">
-              <img src={imageUrl} alt="" className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-lg"/>
+              <img src={imageUrl} alt={props.node.attrs.alt || ''} className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-lg"/>
               {unsplashCredit}
             </div>}/>)}
     </>);
