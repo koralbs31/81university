@@ -689,7 +689,7 @@ class TestWhiteLabelling:
     async def test_defaults_when_the_org_has_no_branding(self, db, activation_org, sender):
         await run_nudges(db, now=NOW)
         assert sender.call_args.kwargs["brand_color"] is None
-        assert sender.call_args.kwargs["powered_by"] is True
+        assert sender.call_args.kwargs["powered_by"] is False
 
 
 class TestBudgetMidOrganization:
