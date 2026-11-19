@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Globe,
   Book,
+  Browser,
   SignOut,
   CaretRight,
   Check,
@@ -372,9 +373,8 @@ function MobileMoreSheet({
                   {currentLang === language.code && <Check size={16} weight="bold" className="text-neutral-900" />}
                 </button>
               ))}
-            {isAdmin && (
-              <SheetRow href="https://docs.learnhouse.app" external Icon={Book} label={t('common.help_menu.documentation')} />
-            )}
+            <SheetRow href="https://github.com/koralbs31/81university" external Icon={Browser} label={t('common.software_source')} />
+            <SheetRow href="/software-notices" Icon={Book} label="AGPL-3.0" />
             {isAuthenticated && (
               <SheetRow
                 onClick={() => {

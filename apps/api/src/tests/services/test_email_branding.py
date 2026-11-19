@@ -66,7 +66,7 @@ class TestResolveOrgBrandColor:
 
 class TestResolveOrgPoweredBy:
     def test_defaults_to_shown(self):
-        for mode in ("oss", "ee", "saas"):
+        for mode in ("ee", "saas"):
             with patch("src.core.deployment_mode.get_deployment_mode", return_value=mode):
                 assert resolve_org_powered_by(None) is True, mode
                 assert resolve_org_powered_by(_config({})) is True, mode
@@ -93,15 +93,15 @@ class TestResolveOrgPoweredBy:
             with patch("src.core.deployment_mode.get_deployment_mode", return_value="saas"):
                 assert resolve_org_powered_by(cfg) is True
 
-    def test_open_source_edition_always_shows_it(self):
-        # Attribution is part of the OSS deal: no stored flag or plan turns it off.
+    def test_open_source_deployment_omits_promotional_footer(self):
+        # Required software notices are in the app, separate from email promotion.
         for cfg in (
             _config({"plan": "pro", "customization": {"general": {"watermark": False}}}),
             _config({"cloud": {"plan": "enterprise"}, "general": {"watermark": False}}),
             _config({"customization": {"general": {"watermark": False}}}),
         ):
             with patch("src.core.deployment_mode.get_deployment_mode", return_value="oss"):
-                assert resolve_org_powered_by(cfg) is True
+                assert resolve_org_powered_by(cfg) is False
 
     def test_enterprise_licence_can_turn_it_off(self):
         cfg = _config({"plan": "free", "customization": {"general": {"watermark": False}}})
@@ -167,7 +167,7 @@ class TestResolveOrgEmailBranding:
     def test_defaults_without_a_config_row(self):
         with patch("src.services.email.utils.get_media_base_url", return_value=""):
             branding = resolve_org_email_branding(self._org(logo_image=None), None)
-        assert branding == OrgEmailBranding(org_name="Acme & Co")
+        assert branding == OrgEmailBranding(org_name="Acme & Co", powered_by=False)
 
     def test_as_kwargs_matches_the_send_function_parameters(self):
         import inspect

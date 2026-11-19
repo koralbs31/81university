@@ -1,4 +1,4 @@
-# LearnHouse — simplified edition
+# 81 University
 
 A course platform with a block editor, assignments and exercises, student progress, communities, messaging, certificates and user management. The interface supports Hebrew (RTL), English and Arabic (RTL).
 
@@ -33,5 +33,7 @@ The deployed VPS configuration and maintenance commands are in [deploy/vps/READM
 - API surface check: `cd apps/api && uv run python scripts/check_simplified_surface.py`
 - UI type check: `cd apps/web && bunx next typegen && bunx tsc --noEmit`
 - Hebrew/RTL checks: `cd apps/web && bun test --isolate tests/rtl-guard.test.mjs`
+
+Modified by the 81 University project; modification notice dated 19 November 2026. Changes include branding, Hebrew/Arabic support, feature simplification and deployment changes. Subsequent modifications and dates are recorded in Git history. This modified application remains licensed under AGPL-3.0.
 
 Original project: [LearnHouse](https://github.com/learnhouse/learnhouse). See [LICENSE](LICENSE).

@@ -1,5 +1,7 @@
 {
   "common": {
+    "software_source": "Source code",
+    "software_notices": "Software notices",
     "hello": "Hello",
     "home": "Home",
     "back_to_home": "Back to Home",

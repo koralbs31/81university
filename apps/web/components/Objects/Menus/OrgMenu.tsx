@@ -20,6 +20,7 @@ import useAdminStatus from '@components/Hooks/useAdminStatus'
 import {
   Question,
   Book,
+  Browser,
   Globe,
   ChatCircleDots,
   SquaresFour,
@@ -28,7 +29,6 @@ import {
   ChatsCircle,
   CalendarDots,
 } from '@phosphor-icons/react'
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -273,81 +273,52 @@ export const OrgMenu = (props: any) => {
               </div>
             )}
 
-            {/* Help Dropdown - Only visible to admins/maintainers/instructors */}
-            {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
-              <div className="hidden lg:flex">
-                <DropdownMenu>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
-                            aria-label={t('common.help')}
-                          >
-                            <Question size={20} weight="fill" />
-                          </button>
-                        </DropdownMenuTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        {t('common.help')}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <Question size={16} weight="fill" />
-                      <span>{t('common.help')}</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="https://docs.learnhouse.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Book size={16} weight="fill" />
-                        <span>{t('common.help_menu.documentation')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Globe size={16} weight="fill" />
-                        <span>{t('common.help_menu.website')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="http://learnhouse.to/discord"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <DiscordIcon size={16} />
-                        <span>{t('common.help_menu.discord')}</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setFeedbackModalMounted(true)
-                        setFeedbackModalOpen(true)
-                      }}
-                      className="flex items-center gap-2"
-                    >
-                      <ChatCircleDots size={16} weight="fill" />
-                      <span>{t('common.help_menu.report_feedback')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+            {/* Help and software source are available to every visitor. */}
+            <div data-software-help="desktop" className="hidden lg:flex">
+              <DropdownMenu>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className={`p-2 rounded-lg transition-colors ${colors.iconBtn}`}
+                          aria-label={t('common.help')}
+                        >
+                          <Question size={20} weight="fill" />
+                        </button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      {t('common.help')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <Question size={16} weight="fill" />
+                    <span>{t('common.help')}</span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <a href="https://github.com/koralbs31/81university" className="flex items-center gap-2"><Browser size={16} weight="fill" /><span>{t('common.software_source')}</span></a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="/software-notices" className="flex items-center gap-2"><Book size={16} weight="fill" /><span>AGPL-3.0</span></a>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setFeedbackModalMounted(true)
+                      setFeedbackModalOpen(true)
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <ChatCircleDots size={16} weight="fill" />
+                    <span>{t('common.help_menu.report_feedback')}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             <div className="hidden lg:flex">
               <HeaderProfileBox primaryColor={primaryColor} />

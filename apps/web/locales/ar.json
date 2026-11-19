@@ -1,5 +1,7 @@
 {
   "common": {
+    "software_source": "الكود المصدري",
+    "software_notices": "إشعارات البرمجيات",
     "hello": "مرحباً",
     "home": "الرئيسية",
     "back_to_home": "العودة للرئيسية",

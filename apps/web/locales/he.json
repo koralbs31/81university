@@ -1,5 +1,7 @@
 {
   "common": {
+    "software_source": "קוד מקור",
+    "software_notices": "רישיונות תוכנה",
     "hello": "שלום",
     "home": "בית",
     "back_to_home": "חזרה לבית",

@@ -2,10 +2,9 @@
 import { branding } from '@/lib/branding'
 import { useOrg } from '@components/Contexts/OrgContext';
 import { signOut } from '@components/Contexts/AuthContext';
-import { House, BookOpen, Files, Users, CurrencyCircleDollar, Buildings, Globe, Question, Gear, SignOut, SidebarSimple, Check, CaretDown, PencilSimple, ChatsCircle, Book, ChatCircleDots, Headphones, VideoCamera, ChartBar, DotsThree, UsersThree, Shield, UserPlus, ClipboardText, Palette, Rocket, Robot, LinkSimple, Key, Lock, Wrench, ChartLine, MagnifyingGlass, ChalkboardSimple, Cube, ShoppingBag, FolderSimple, Plus, Code, Lightning, Steps, SlidersHorizontal, } from '@phosphor-icons/react';
+import { House, BookOpen, Files, Users, CurrencyCircleDollar, Buildings, Globe, Browser, Question, Gear, SignOut, SidebarSimple, Check, CaretDown, PencilSimple, ChatsCircle, Book, ChatCircleDots, Headphones, VideoCamera, ChartBar, DotsThree, UsersThree, Shield, UserPlus, ClipboardText, Palette, Rocket, Robot, LinkSimple, Key, Lock, Wrench, ChartLine, MagnifyingGlass, ChalkboardSimple, Cube, ShoppingBag, FolderSimple, Plus, Code, Lightning, Steps, SlidersHorizontal, } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { isOrgAnalyticsAvailable } from '@ee/components/Analytics/availability';
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon';
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -617,22 +616,10 @@ function DashLeftMenu() {
                 </HoverMenuLabel>
                 <HoverMenuSeparator />
                 <HoverMenuItem asChild>
-                  <a href="https://docs.learnhouse.app" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                    <Book size={16} weight="fill"/>
-                    <span>{t('common.help_menu.documentation')}</span>
-                  </a>
+                  <a href="https://github.com/koralbs31/81university" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08]"><Browser size={16} weight="fill" /><span>{t('common.software_source')}</span></a>
                 </HoverMenuItem>
                 <HoverMenuItem asChild>
-                  <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                    <Globe size={16} weight="fill"/>
-                    <span>{t('common.help_menu.website')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a href="http://learnhouse.to/discord" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                    <DiscordIcon size={16}/>
-                    <span>{t('common.help_menu.discord')}</span>
-                  </a>
+                  <a href="/software-notices" className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08]"><Book size={16} weight="fill" /><span>AGPL-3.0</span></a>
                 </HoverMenuItem>
                 <HoverMenuSeparator />
                 <HoverMenuItem onClick={() => setFeedbackModalOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
@@ -640,7 +627,7 @@ function DashLeftMenu() {
                   <span>{t('common.help_menu.report_feedback')}</span>
                 </HoverMenuItem>
               </HoverMenuContent>}>
-            <button aria-label={t('dashboard.nav.open_help_menu')} className={cn("flex items-center w-full rounded-lg text-white/50 hover:text-white hover:bg-white/[0.08] transition-all group", isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3")}>
+            <button data-software-help="desktop" aria-label={t('dashboard.nav.open_help_menu')} className={cn("flex items-center w-full rounded-lg text-white/50 hover:text-white hover:bg-white/[0.08] transition-all group", isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3")}>
               <Question size={20} weight="fill"/>
               {!isCollapsed && (<span className="text-sm font-medium">{t('common.help')}</span>)}
             </button>

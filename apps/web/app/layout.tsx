@@ -3,6 +3,7 @@ import { branding } from '@/lib/branding'
 import React from 'react'
 import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
+import SoftwareHelp from '@components/Footers/SoftwareHelp'
 import localFont from 'next/font/local'
 
 const wixMadeforText = localFont({
@@ -91,6 +92,7 @@ export default function RootLayout({
           <main className="animate-fade-in">
             {children}
           </main>
+          <SoftwareHelp />
         </Providers>
       </body>
     </html>

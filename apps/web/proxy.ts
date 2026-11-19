@@ -304,6 +304,9 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.next({ request: { headers: withoutCredentialHeaders(req.headers) } })
   }
 
+  // Public software notices must bypass tenant rewrites and authentication.
+  if (req.nextUrl.pathname === '/software-notices') return NextResponse.next()
+
   const instance = await getInstanceInfo()
   const { pathname, search } = req.nextUrl
   const fullhost = req.headers.get('host')

@@ -24,13 +24,13 @@ import {
   Check,
   ChatCircleDots,
   Book,
+  Browser,
   CaretDown,
   CaretRight,
   MagnifyingGlass,
   Code,
   DotsNine,
 } from '@phosphor-icons/react'
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -237,8 +237,8 @@ function DashMobileMenu() {
                   ))}
                 </div>
               )}
-              <SheetRow href="https://docs.learnhouse.app" external Icon={Book} label={t('common.help_menu.documentation')} />
-              <SheetRow href="http://learnhouse.to/discord" external Icon={DiscordIcon} label={t('common.help_menu.discord')} />
+              <SheetRow href="https://github.com/koralbs31/81university" external Icon={Browser} label={t('common.software_source')} />
+              <SheetRow href="/software-notices" Icon={Book} label="AGPL-3.0" />
               <SheetRow
                 Icon={ChatCircleDots}
                 label={t('common.help_menu.report_feedback')}
