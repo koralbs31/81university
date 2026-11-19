@@ -4,7 +4,7 @@ api:
   replicas: 2
   image:
     repository: ghcr.io/koralbs31/81university-api
-    tag: 49b360c7dffe264b4ce2f34ed596cf63ace54a65
+    tag: 0c99920e2d05d7d740647a6d768c6f2734626103
     pullPolicy: IfNotPresent
   env:
     FORWARDED_ALLOW_IPS: 10.42.0.0/16
@@ -12,7 +12,7 @@ web:
   replicas: 2
   image:
     repository: ghcr.io/koralbs31/81university-web
-    tag: 49b360c7dffe264b4ce2f34ed596cf63ace54a65
+    tag: 0c99920e2d05d7d740647a6d768c6f2734626103
     pullPolicy: IfNotPresent
   existingSecret: learnhouse-web-secrets
 contentStorage:
