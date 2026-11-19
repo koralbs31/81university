@@ -2626,8 +2626,8 @@
   }
 }
 
-/* Keyboard focus must remain visible even on controls that reset outlines. */
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+/* Outline controls, not programmatically focused menu/dialog containers. */
+:where(a, button, input, select, textarea, [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role^="menuitem"], [contenteditable="true"], [tabindex]:not([tabindex="-1"]):not([role="menu"]):not([role="dialog"]):not([role="listbox"])):focus-visible {
   outline: 2px solid #2563eb !important;
   outline-offset: 3px;
 }

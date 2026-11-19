@@ -12,6 +12,7 @@ test('visitors can skip navigation and operate Help with a keyboard', async ({ p
   await help.focus()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('menu')).toBeVisible()
+  await expect(page.getByRole('menu')).not.toHaveCSS('outline-style', 'solid')
   await expect(page.getByRole('menuitem').filter({ hasText: 'AGPL-3.0' })).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(help).toBeFocused()
