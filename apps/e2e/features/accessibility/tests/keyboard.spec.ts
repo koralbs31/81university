@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 const helpName = /^(Help|עזרה|مساعدة)$/i
 
 test('visitors can skip navigation and operate Help with a keyboard', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'networkidle' })
   const skip = page.locator('a[href="#main-content"]')
   await skip.focus()
   await page.keyboard.press('Enter')
@@ -52,4 +52,35 @@ test('dashboard Help works by keyboard and lesson links have names', async ({ pa
   for (const link of await page.locator('a[href*="/activity/"]').all()) {
     await expect(link).toHaveAccessibleName(/\S/)
   }
+})
+
+
+test('mouse focus stays quiet and keyboard navigation shows the focus outline', async ({ page }) => {
+  await page.goto('/login')
+  const email = page.locator('input[type=email]').first()
+  await email.click()
+  await expect(page.locator('html')).toHaveAttribute('data-focus-input', 'pointer')
+  await expect(email).not.toHaveCSS('outline-color', 'rgb(37, 99, 235)')
+  await page.keyboard.press('Tab')
+  await expect(page.locator('html')).toHaveAttribute('data-focus-input', 'keyboard')
+  await expect(page.locator(':focus')).toHaveCSS('outline-color', 'rgb(37, 99, 235)')
+  await email.click()
+  await expect(email).not.toHaveCSS('outline-color', 'rgb(37, 99, 235)')
+  // Browser heuristics also classify contenteditable regions as focus-visible
+  // on click; the input mode gate must cover those, including menu autofocus.
+  await page.evaluate(() => {
+    const editor = document.createElement('div')
+    editor.contentEditable = 'true'
+    editor.setAttribute('role', 'textbox')
+    editor.setAttribute('aria-label', 'Focus regression editor')
+    editor.textContent = 'Editable content'
+    document.body.append(editor)
+  })
+  const editor = page.getByRole('textbox', { name: 'Focus regression editor' })
+  await editor.click()
+  await expect(editor).not.toHaveCSS('outline-color', 'rgb(37, 99, 235)')
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  await expect(editor).toBeFocused()
+  await expect(editor).toHaveCSS('outline-color', 'rgb(37, 99, 235)')
 })

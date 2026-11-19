@@ -2626,8 +2626,8 @@
   }
 }
 
-/* Outline controls, not programmatically focused menu/dialog containers. */
-:where(a, button, input, select, textarea, [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role^="menuitem"], [contenteditable="true"], [tabindex]:not([tabindex="-1"]):not([role="menu"]):not([role="dialog"]):not([role="listbox"])):focus-visible {
+/* Show the custom outline only during keyboard navigation, not mouse/editor autofocus. */
+html[data-focus-input="keyboard"] :where(a, button, input, select, textarea, [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role^="menuitem"], [contenteditable="true"], [tabindex]:not([tabindex="-1"]):not([role="menu"]):not([role="dialog"]):not([role="listbox"])):focus-visible {
   outline: 2px solid #2563eb !important;
   outline-offset: 3px;
 }
