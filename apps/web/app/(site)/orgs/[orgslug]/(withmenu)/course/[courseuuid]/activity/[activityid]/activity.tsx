@@ -31,7 +31,7 @@ import CourseAccessError from '@components/Objects/Courses/CourseAccessError/Cou
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useMediaQuery, useWindowSize } from 'usehooks-ts';
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus';
+import { useContributorStatus } from '@/hooks/useContributorStatus';
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import ActivityShareDropdown from '@components/Pages/Activity/ActivityShareDropdown';

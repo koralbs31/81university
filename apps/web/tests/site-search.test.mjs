@@ -78,9 +78,9 @@ describe('page registry', () => {
   const lookup = (key) => key.split('.').reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), en)
 
   const metaFiles = fs
-    .readdirSync(path.join(webRoot, 'app/orgs/[orgslug]/(withmenu)'), { recursive: true })
+    .readdirSync(path.join(webRoot, 'app/(site)/orgs/[orgslug]/(withmenu)'), { recursive: true })
     .filter((f) => String(f).endsWith('page.search.ts') && !String(f).includes('account'))
-    .map((f) => path.join('app/orgs/[orgslug]/(withmenu)', String(f)))
+    .map((f) => path.join('app/(site)/orgs/[orgslug]/(withmenu)', String(f)))
 
   test('finds the learner page metadata files', () => {
     expect(metaFiles.length).toBe(7)

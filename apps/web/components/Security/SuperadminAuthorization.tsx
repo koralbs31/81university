@@ -51,7 +51,7 @@ const SuperadminAuthorization: React.FC<SuperadminAuthorizationProps> = ({
     )
   }
 
-  // No deployment-mode check here. app/admin/layout.tsx resolves the mode
+  // No deployment-mode check here. app/(protected)/admin/layout.tsx resolves the mode
   // server-side and renders the licence screen before this component mounts.
   // The previous check ran on a client-side value and failed closed, which
   // could hide the dashboard from legitimate operators during a transient

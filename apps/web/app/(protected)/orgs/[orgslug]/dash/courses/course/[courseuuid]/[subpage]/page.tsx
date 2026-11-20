@@ -1,6 +1,6 @@
 'use client'
 import React, { use, useEffect } from 'react';
-import { CourseProvider } from '../../../../../../../../components/Contexts/CourseContext'
+import { CourseProvider } from '@components/Contexts/CourseContext'
 import { CourseOverviewTop } from '@components/Dashboard/Misc/CourseOverviewTop'
 import { motion } from 'motion/react'
 import { GalleryVerticalEnd, Globe, Info, UserPen, Award, Lock, Search, CalendarClock } from 'lucide-react'

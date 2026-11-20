@@ -23,7 +23,7 @@ const isAdminPath = (pathname) =>
   pathname === PREFIX || pathname.startsWith(`${PREFIX}/`);
 
 describe("every dash section is gated", () => {
-  // The sections that exist under app/orgs/[orgslug]/dash. Only 3 were listed
+  // The sections that exist under app/(protected)/orgs/[orgslug]/dash. Only 3 were listed
   // before; the rest fell through to the "not an admin path" branch.
   const SECTIONS = [
     "analytics", "assignments", "boards", "communities", "courses",

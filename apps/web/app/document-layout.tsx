@@ -62,8 +62,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  allowAccessibilityWidget = false,
 }: {
   children: React.ReactNode
+  allowAccessibilityWidget?: boolean
 }) {
   // `dir` is deliberately absent from the <html> below. React only reconciles
   // attributes present in its virtual tree, so leaving it out means React never
@@ -99,10 +101,10 @@ export default function RootLayout({
           </main>
           <SoftwareHelp />
         </Providers>
-        <Script
+        {allowAccessibilityWidget && <Script
           src="https://negishot.co.il/cdn/widget.php?code=NGS_A605A0FFAD6B"
           strategy="afterInteractive"
-        />
+        />}
       </body>
     </html>
   )

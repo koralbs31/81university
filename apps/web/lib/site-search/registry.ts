@@ -1,13 +1,13 @@
 import type { SitePageMeta } from './types'
 
-import { sitePage as home } from '@/app/orgs/[orgslug]/(withmenu)/page.search'
-import { sitePage as courses } from '@/app/orgs/[orgslug]/(withmenu)/courses/page.search'
-import { sitePage as paths } from '@/app/orgs/[orgslug]/(withmenu)/paths/page.search'
-import { sitePage as liveSessions } from '@/app/orgs/[orgslug]/(withmenu)/live/page.search'
-import { sitePage as communities } from '@/app/orgs/[orgslug]/(withmenu)/communities/page.search'
-import { sitePage as trail } from '@/app/orgs/[orgslug]/(withmenu)/trail/page.search'
-import { sitePage as search } from '@/app/orgs/[orgslug]/(withmenu)/search/page.search'
-import { searchMetas as accountMetas } from '@/app/orgs/[orgslug]/(withmenu)/account/page.search'
+import { sitePage as home } from '@/app/(site)/orgs/[orgslug]/(withmenu)/page.search'
+import { sitePage as courses } from '@/app/(site)/orgs/[orgslug]/(withmenu)/courses/page.search'
+import { sitePage as paths } from '@/app/(site)/orgs/[orgslug]/(withmenu)/paths/page.search'
+import { sitePage as liveSessions } from '@/app/(site)/orgs/[orgslug]/(withmenu)/live/page.search'
+import { sitePage as communities } from '@/app/(site)/orgs/[orgslug]/(withmenu)/communities/page.search'
+import { sitePage as trail } from '@/app/(site)/orgs/[orgslug]/(withmenu)/trail/page.search'
+import { sitePage as search } from '@/app/(site)/orgs/[orgslug]/(withmenu)/search/page.search'
+import { searchMetas as accountMetas } from '@/app/(protected)/orgs/[orgslug]/(withmenu)/account/page.search'
 
 // The account pages already describe themselves for the dashboard palette;
 // reuse their titles, icons and routes with learner-facing copy.
