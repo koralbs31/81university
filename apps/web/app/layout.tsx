@@ -6,6 +6,7 @@ import Providers from '@components/Providers'
 import SoftwareHelp from '@components/Footers/SoftwareHelp'
 import SkipToContent from '@components/Accessibility/SkipToContent'
 import localFont from 'next/font/local'
+import Script from 'next/script'
 
 const wixMadeforText = localFont({
   src: './fonts/WixMadeforText.ttf',
@@ -98,6 +99,10 @@ export default function RootLayout({
           </main>
           <SoftwareHelp />
         </Providers>
+        <Script
+          src="https://negishot.co.il/cdn/widget.php?code=NGS_A605A0FFAD6B"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
